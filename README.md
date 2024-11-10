@@ -7,7 +7,7 @@ Building on the prototype of Ramlot T. and Van Landuyt K., this project aims to 
 This is the third instalment in a series of master's theses, where Kubernetes is adapted for orchestration at the edge by making use of WebAssembly.  
 It builds on the prior work of Ramlot T. ([Github repo](https://github.com/thesis-2022-wasm-operators/wasm_operator)), who created the prototype, and Van Landuyt K. ([Github repo](https://github.com/kvanla/wasm-operator)), who expanded the prototype with predictive capabilities.
 
-During the development of Van Landuyt's solution, problematic behaviour was highlighted in the used operators, where the operators would wake-up in a set interval (this through analysis of the [Percona MongoDB Operator](https://github.com/percona/percona-server-mongodb-operator)).
+During the development of Van Landuyt's solution, problematic behavior was highlighted in the used operators, where the operators would wake-up in a set interval (this through analysis of the [Percona MongoDB Operator](https://github.com/percona/percona-server-mongodb-operator)).
 This is problematic for the WASM prototype, since unloading is used to minimize the operator footprint.
 Minimizing the number of wake-ups (i.e. calling the reconcilation function), increases the efficiency of the solution.
 
@@ -34,15 +34,26 @@ All information is included in this repository. Everything relevant to the proto
 
 
 ### Internal folder structure
-#TODO
+
+```text
++-- 📂thesis_resources                  # Resources and documentation specific to the thesis project.
+|   +-- 📂findings                      # Detailed research findings and analyses from the project.
+|   +-- 📂meeting_notes                 # Summaries from bi-weekly thesis meetings.
+|   +-- 📂reconcile_testing_operators   # Modified Kubernetes operators exhibiting undesired reconciliation behavior, with added tracing code and setup.
+|   +-- sources.md                      # Table containing overview of most of the used sources.
+```
+
+> [!NOTE]
+> Meeting notes will often contain duplicate information. It is mostly used for tracking purposes.  
+> The discussed topics are filtered and written down more thoroughly in the other parts of the project.
 
 
 ### Planning
 | Period | Tasks |
 | ------ | ----- |
 | 27/09 - 07/10 | <ul><li>Go through previous master theses</li><li>Research what operators do when activated</li><li>Investigate how events work on client and server side and why these aren't enough for the WASM-operator</li></ul> |
-| 7/10 - 22/10 | <ul><li>Analyze Van Landuyt's K.'s operators for the wake-up behavior by investigating the code and traces</li></ul> |
-| 22/10 - 4/11 | <ul><li>Analyze Van Landuyt's K.'s operators for the wake-up behavior by investigating the code and traces</li><li>Compare the operator(/controller) architecture from Kubebuilder with kube.rs</li></ul> |
+| 7/10 - 21/10 | <ul><li>Analyze Van Landuyt's K.'s operators for the wake-up behavior by investigating the code and traces</li></ul> |
+| 21/10 - 4/11 | <ul><li>Analyze Van Landuyt's K.'s operators for the wake-up behavior by investigating the code and traces</li><li>Compare the operator(/controller) architecture from Kubebuilder with kube.rs</li></ul> |
 | 4/11 - 18/11 | <ul><li>Compare the operator(/controller) architecture from Kubebuilder with kube.rs</li><li>Expand the tracing within the operators to identify call sites of scheduled reconcilation</li></ul> |
 | 18/11 - 2/12<br>2/12 - 16/12| <ul><li>Investigate the WASM-prototype</li><li>Work toward prototype solution</li></ul> |
 
