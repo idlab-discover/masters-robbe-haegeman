@@ -54,8 +54,9 @@ All information is included in this repository. Everything relevant to the proto
 | 27/09 - 07/10 | <ul><li>Go through previous master theses</li><li>Research what operators do when activated</li><li>Investigate how events work on client and server side and why these aren't enough for the WASM-operator</li></ul> |
 | 7/10 - 21/10 | <ul><li>Analyze Van Landuyt's K.'s operators for the wake-up behavior by investigating the code and traces</li></ul> |
 | 21/10 - 4/11 | <ul><li>Analyze Van Landuyt's K.'s operators for the wake-up behavior by investigating the code and traces</li><li>Compare the operator(/controller) architecture from Kubebuilder with kube.rs</li></ul> |
-| 4/11 - 18/11 | <ul><li>Compare the operator(/controller) architecture from Kubebuilder with kube.rs</li><li>Expand the tracing within the operators to identify call sites of scheduled reconcilation</li></ul> |
-| 18/11 - 2/12<br>2/12 - 16/12| <ul><li>Investigate the WASM-prototype</li><li>Work toward prototype solution</li></ul> |
+| 4/11 - 18/11 | <ul><li>Compare the operator(/controller) architecture from Kubebuilder with kube.rs</li><li>Investigate how scheduled reconcilation is implemented and why</li></ul> |
+| 18/11 - 2/12| <ul><li>Run the WASM-prototype locally and investigate further</li><li>Find which parts of the Percona MongoDB operator enforce the use of scheduled reconcilation</li><li>Continue learning Kube.rs</li></ul> |
+| 2/12 - 16/12| <ul><li>Work toward prototype solution</li><li>Work on presentation</li></ul> |
 
 ## Copyright
 This project is released under the Apache License Version 2.0.
