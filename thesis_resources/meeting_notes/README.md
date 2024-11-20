@@ -14,3 +14,4 @@ These are not exhaustive: they do not contain everything that was done before th
 - [Meeting 2: Identification of the problem](./Meeting%2010-07.md)
 - [Meeting 3: Setup of operators and tracing](./Meeting%2010-21.md)
 - [Meeting 4: Recreation of Van Landuyt's tracing](./Meeting%2011-04.md)
+- [Meeting 5: Investigation of scheduled reconcilation](./Meeting%2011-18.md)
