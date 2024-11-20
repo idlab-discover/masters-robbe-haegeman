@@ -26,3 +26,5 @@
 | Low | OpenTracing with Jaeger | [RedHat Developers](https://developers.redhat.com/blog/2017/07/10/using-opentracing-with-jaeger-to-collect-application-metrics-in-kubernetes) | Red Hat | Guide on using OpenTracing and Jaeger for application metrics in Kubernetes |  |
 | High | Kubernetes Controllers Introduction | [kube.rs](https://kube.rs/controllers/intro/) | kube-rs Project | Introductory guide to Kubernetes controllers written in Rust |  |
 | High | Kubernetes in Action | [O'Reilly Media](https://learning.oreilly.com/library/view/kubernetes-in-action/9781617293726/Text/07.html) | Marko Lukša | An in-depth resource on Kubernetes, covering core concepts, applications, and advanced deployments |  |
+| High | Writing a Kubernetes Operator (Operator with extension api-server) | [metalbear.co](https://metalbear.co/blog/writing-a-kubernetes-operator/) | Dmitry Dodzin | Guide on creating a Kubernetes Operator using kube-rs + extension api server | |
+| Medium | A Rust controller for Kubernetes | [blog.frankel.ch](https://blog.frankel.ch/start-rust/6/) | Nicolas Frankel | Introduction to Kube.rs; project setup + api use |  |
