@@ -12,12 +12,7 @@ use tokio::time;
 #[command(version, about, long_about = None)]
 struct Args {
     /// Uri to connect to the MongoDB cluster
-    #[arg(
-        short = 'u',
-        long,
-        env = "MONGO_URI",
-        default_value = "mongodb://root:password@localhost:27017"
-    )]
+    #[arg(short = 'u', long, env = "MONGO_URI")]
     db_uri: String,
 
     /// Name of the MongoDB database
