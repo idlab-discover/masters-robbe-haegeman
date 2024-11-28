@@ -1,11 +1,33 @@
+use clap::Parser;
 use futures_util::StreamExt;
 use mongodb::bson::{doc, Document};
 use mongodb::{Client, Collection, Database};
 use rand::distributions::{Alphanumeric, DistString};
 use serde::{Deserialize, Serialize};
-use std::env;
 use std::time::Instant;
 use tokio::time;
+
+/// Simple program to create events for the Percona MongoDB operator
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Args {
+    /// Uri to connect to the MongoDB cluster
+    #[arg(
+        short = 'u',
+        long,
+        env = "MONGO_URI",
+        default_value = "mongodb://root:password@localhost:27017"
+    )]
+    db_uri: String,
+
+    /// Name of the MongoDB database
+    #[arg(short = 'n', long, env = "MONGO_DBNAME", default_value = "test")]
+    db_name: String,
+
+    /// Number of books to generate
+    #[arg(short = 'c', long, env = "BOOK_COUNT", default_value_t = 1000)]
+    book_count: u32,
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Book {
@@ -15,9 +37,11 @@ struct Book {
 
 #[tokio::main]
 async fn main() {
-    let c = get_connection().await.unwrap();
+    let args = Args::parse();
 
-    generate_books(&c).await.unwrap();
+    let c = get_connection(&args.db_uri, &args.db_name).await.unwrap();
+
+    generate_books(&c, args.book_count).await.unwrap();
 
     let mut total_reads = 0;
 
@@ -56,16 +80,13 @@ async fn read_ops(db: &Database) -> i32 {
     i
 }
 
-async fn get_connection() -> Result<Database, mongodb::error::Error> {
-    let client = Client::with_uri_str(
-        &env::var("MONGO_URI").unwrap_or("mongodb://root:password@localhost:27017".to_string()),
-    )
-    .await?;
+async fn get_connection(db_uri: &str, db_name: &str) -> Result<Database, mongodb::error::Error> {
+    let client = Client::with_uri_str(db_uri).await?;
+    let db = client.database(db_name);
 
-    let db = client.database(&env::var("MONGO_DBNAME").unwrap_or("test".to_string()));
-
+    println!("Attempting connection to {}", db_name);
     db.run_command(doc! {"ping": 1}).await?;
-    println!("Connected successfully.");
+    println!("Connected successfully to {}", db_name);
     Ok(db)
 }
 
@@ -76,11 +97,11 @@ fn generate_book() -> Document {
     doc! {"title": title, "author":author}
 }
 
-async fn generate_books(db: &Database) -> Result<(), mongodb::error::Error> {
+async fn generate_books(db: &Database, book_count: u32) -> Result<(), mongodb::error::Error> {
     let conn = db.collection("test");
 
     let mut books = vec![];
-    for _ in 0..1000 {
+    for _ in 0..book_count {
         books.push(generate_book())
     }
 
