@@ -1,6 +1,6 @@
-use futures::stream::StreamExt;
+use futures_util::StreamExt;
 use mongodb::bson::{doc, Document};
-use mongodb::{Client, Database};
+use mongodb::{Client, Collection, Database};
 use rand::distributions::{Alphanumeric, DistString};
 use serde::{Deserialize, Serialize};
 use std::env;
@@ -40,9 +40,9 @@ async fn main() {
 
 async fn read_ops(db: &Database) -> i32 {
     let mut i = 0;
-    let conn = db.collection("test");
+    let conn: Collection<Book> = db.collection("test");
 
-    if let Ok(mut cursor) = conn.find(None, None).await {
+    if let Ok(mut cursor) = conn.find(doc! {}).await {
         while let Some(result) = cursor.next().await {
             match result {
                 Ok(_) => {
@@ -64,7 +64,7 @@ async fn get_connection() -> Result<Database, mongodb::error::Error> {
 
     let db = client.database(&env::var("MONGO_DBNAME").unwrap_or("test".to_string()));
 
-    db.run_command(doc! {"ping": 1}, None).await?;
+    db.run_command(doc! {"ping": 1}).await?;
     println!("Connected successfully.");
     Ok(db)
 }
@@ -84,6 +84,6 @@ async fn generate_books(db: &Database) -> Result<(), mongodb::error::Error> {
         books.push(generate_book())
     }
 
-    conn.insert_many(books, None).await?;
+    conn.insert_many(books).await?;
     Ok(())
 }
