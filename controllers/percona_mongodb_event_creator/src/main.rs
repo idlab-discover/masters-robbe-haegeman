@@ -1,13 +1,10 @@
-use async_trait::async_trait;
-use futures::stream::{StreamExt, TryStreamExt};
+use futures::stream::StreamExt;
 use mongodb::bson::{doc, Document};
 use mongodb::{Client, Database};
 use rand::distributions::{Alphanumeric, DistString};
-use schemars::gen;
 use serde::{Deserialize, Serialize};
 use std::env;
 use std::time::Instant;
-use tokio::task;
 use tokio::time;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -22,7 +19,7 @@ async fn main() {
 
     generate_books(&c).await.unwrap();
 
-    let mut totalReads = 0;
+    let mut total_reads = 0;
 
     let now = Instant::now();
     let mut interval = time::interval(time::Duration::from_secs(1));
@@ -30,11 +27,11 @@ async fn main() {
         interval.tick().await;
 
         let nr = read_ops(&c).await;
-        totalReads += nr;
+        total_reads += nr;
         let elapsed = now.elapsed();
         println!(
             "{:?} reads per sec",
-            totalReads as f64 / elapsed.as_secs_f64()
+            total_reads as f64 / elapsed.as_secs_f64()
         );
     }
 
@@ -76,7 +73,7 @@ fn generate_book() -> Document {
     let title = Alphanumeric.sample_string(&mut rand::thread_rng(), 16);
     let author = Alphanumeric.sample_string(&mut rand::thread_rng(), 16);
 
-    return doc! {"title": title, "author":author};
+    doc! {"title": title, "author":author}
 }
 
 async fn generate_books(db: &Database) -> Result<(), mongodb::error::Error> {
