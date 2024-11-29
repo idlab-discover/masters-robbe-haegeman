@@ -16,7 +16,7 @@ pub async fn get_connection(
     Ok(db)
 }
 
-pub async fn count_all_books(db: &Database) -> i32 {
+pub async fn count_all_books(db: &Database) -> u64 {
     let mut i = 0;
     let collection = db.collection::<Book>("test");
 
@@ -36,7 +36,7 @@ pub async fn count_all_books(db: &Database) -> i32 {
 
 pub async fn insert_random_books(
     db: &Database,
-    book_count: u32,
+    book_count: u64,
 ) -> Result<(), mongodb::error::Error> {
     let collection = db.collection("test");
 
