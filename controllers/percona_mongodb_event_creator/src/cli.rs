@@ -43,4 +43,14 @@ pub enum Commands {
         #[arg(long, env = "BOOK_COUNT", default_value_t = 100)]
         book_count: u64,
     },
+    /// Add books and then request them back
+    WriteRead {
+        /// Time between operations (in s)
+        #[arg(long, env = "INTERVAL", default_value_t = 1)]
+        interval: u64,
+
+        // Number of books to insert each period
+        #[arg(long, env = "BOOK_COUNT", default_value_t = 10)]
+        book_count: u64,
+    },
 }

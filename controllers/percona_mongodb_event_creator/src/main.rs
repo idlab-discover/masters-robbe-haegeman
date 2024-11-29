@@ -30,6 +30,10 @@ async fn main() {
         } => {
             write_function(&conn, args.max_iter, interval, book_count).await;
         }
+        Commands::WriteRead {
+            interval,
+            book_count,
+        } => write_read_function(&conn, args.max_iter, interval, book_count).await,
     }
 
     println!("Hello, world!");
@@ -60,12 +64,27 @@ async fn read_function(conn: &Database, max_iter: u64, interval: u64, prefill_bo
 async fn write_function(conn: &Database, max_iter: u64, interval: u64, book_count: u64) {
     let now = Instant::now();
     let mut interval = time::interval(time::Duration::from_secs(interval));
-    for _i in 0..max_iter {
+    for i in 0..max_iter {
         interval.tick().await;
 
         db::insert_random_books(conn, book_count).await.unwrap();
 
         let elapsed = now.elapsed();
-        println!("[{:?}]  Inserted {} books", elapsed, book_count);
+        println!("[{:?}]  Inserted {} books", elapsed, i * book_count);
+    }
+}
+
+async fn write_read_function(conn: &Database, max_iter: u64, interval: u64, book_count: u64) {
+    let now = Instant::now();
+    let mut interval = time::interval(time::Duration::from_secs(interval));
+    for i in 0..max_iter {
+        interval.tick().await;
+
+        db::insert_random_books(conn, book_count).await.unwrap();
+        let count = db::count_all_books(conn).await;
+
+        let elapsed = now.elapsed();
+        println!("[{:?}]  Inserted {} books", elapsed, (i + 1) * book_count);
+        println!("[{:?}]  Read {} books", elapsed, count);
     }
 }
