@@ -88,20 +88,20 @@ Secondary resources seems to be a proper conclusion.
 The sidecar containers are also interesting, but not the main focus here.
 
 Possibilities to solve the problem:
-- Make changes to Kubebuilder (and or operator-sdk specifically) which allow easy management of secondary resources through CLI command
-  - Both frameworks normally used for project initialization, not during the project
-  - Can't be done at initialization since the secondary resources are often added organically during development
-  - Would have to add new command / use of framework
-- Modify / expand Kubernetes API + Kubebuilder
-  - Register watches to all secondary resources using a single request
-  - Has to be flexible -> allow for filtering some resources + use of predicates for each
-  - Could for example add it's own (optional) Reconcile function (e.g. ReconcileSecondaries), which could have it's own logic
-    - Some stuff in the normal Reconcile function, doesn't have to be executed for secondary resources
-    - In case an event is missed, a scheduled reconcile of e.g. 30 min should be sufficient (or using the `SyncPeriod` (in the manager options), since that is its purpose)
-  - Could also add the ability to fetch all objects immediately
-    - Reconcile always has to fetch the objects -> many GET requests
-    - Would go against general Kubernetes behavior, but would still fit in their model of eventual consistency
-    - Would have to think about how these objects are then represented (for example, would be handy to have the resources grouped by type or maybe even be able to choose in what format), but this could come from the use of a PoC
+1. Add **CLI command to Kubebuilder** (and or operator-sdk) which creates the base for resource watching
+   - Both frameworks normally used for project initialization, not during the project
+   - Can't be done at initialization since the secondary resources are often added organically during development
+   - Would have to add new command / use of framework
+2. Modify / expand **Kubernetes API + Kubebuilder**
+   - Register watches to all secondary resources using a single request
+   - Has to be flexible -> allow for filtering some resources + use of predicates for each
+   - Could for example add its own (optional) Reconcile function (e.g. ReconcileSecondaries), which could have it's own logic
+     - Some stuff in the normal Reconcile function, doesn't have to be executed for secondary resources
+     - In case an event is missed, a scheduled reconcile of e.g. 30 min should be sufficient (or using the `SyncPeriod` (in the manager options), since that is its purpose)
+   - Could also add the ability to fetch all objects immediately
+     - Reconcile always has to fetch the objects -> many GET requests
+     - Would go against general Kubernetes behavior, but would still fit in their model of eventual consistency
+     - Would have to think about how these objects are then represented (for example, would be handy to have the resources grouped by type or maybe even be able to choose in what format), but this could come from the use of a PoC
 
 
 ### Creating a PoC

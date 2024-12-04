@@ -11,19 +11,38 @@ During the development of Van Landuyt's solution, problematic behavior was highl
 This is problematic for the WASM prototype, since unloading is used to minimize the operator footprint.
 Minimizing the number of wake-ups (i.e. calling the reconcilation function), increases the efficiency of the solution.
 
-## Hypothesis
+### "Accepted" reasons to use scheduled reconcilation
+From [Kubebuilder book: Why not use RequeueAfter X for all scenarios instead of watching resources?](https://book.kubebuilder.io/reference/watching-resources.html?highlight=period#why-not-use-requeueafter-x-for-all-scenarios-instead-of-watching-resources):
+> While RequeueAfter is not the primary method for triggering reconciliations, there are specific cases where it is necessary, such as:
+>
+> - **Observing External Systems:** When working with external resources that do not generate events (e.g., external databases or third-party services), RequeueAfter allows the controller to periodically check the status of these resources.
+> - **Time-Based Operations:** Some tasks, such as rotating secrets or renewing certificates, must happen at specific intervals. RequeueAfter ensures these operations are performed on schedule, even when no other changes occur.
+> - **Handling Errors or Delays:** When managing resources that encounter errors or require time to self-heal, RequeueAfter ensures the controller waits for a specified duration before checking the resource’s status again, avoiding constant reconciliation attempts.
+
 ### Source problematic behavior
-The current hypothesis suggests this behavior is in order to optimize operators receiving a large amount of events.
-In case an operator has to watch resources with a large amount of events, calling the reconcile function each time an event occurs would become very inefficient.
-This is why operators contain predicates, these are used by Controllers to filter Events before they are provided to EventHandlers (thus calling the reconcile loop).
-The assumption is that this filtering is insufficient, creating the need for scheduled reconcilation.
+In [findings/investigation_percona_mongodb_reconcile](./thesis_resources/findings/investigation_percona_mongodb_reconcile.md), the entire research process can be found, but in the end two main possibilities were found:
+1. In order to support **sidecar containers**
+   - These often have the ability to modify the behavior of an application, while not directly modifying the Kubernetes resources, preventing the Reconcile function from being called
+   - This can also be seen under the category of "Observing External Systems"
+2. In order to manage the **secondary resources** created when a CR is initialized
+   - Doing this properly would involve setting up the correct watches, referencing the CR object and making sure the event filtering (through the use of predicates) is up to snuff
 
 ### Possible solutions
-Two possible solutions to this issue are currently being investigated:
-1. Modifying the Kubernetes API to expand the event-filtering capabilities of the watch endpoint, allowing for behavior such as "the current value of the custom resource is an outlier" to be implemented.
-2. Expanding the parent operator, used in the WASM-operator framework, to watch the events for the child operators, filter the necessary events, and only forward the minimal subset.
+1. Add **CLI command to Kubebuilder** (and or operator-sdk) which creates the base for resource watching
+   - Both frameworks normally used for project initialization, not during the project
+   - Can't be done at initialization since the secondary resources are often added organically during development
+   - Would have to add new command / use of framework
+2. Modify / expand **Kubernetes API + Kubebuilder**
+   - Register watches to all secondary resources using a single request
+   - Has to be flexible -> allow for filtering some resources + use of predicates for each
+   - Could for example add its own (optional) Reconcile function (e.g. ReconcileSecondaries), which could have it's own logic
+     - Some stuff in the normal Reconcile function, doesn't have to be executed for secondary resources
+     - In case an event is missed, a scheduled reconcile of e.g. 30 min should be sufficient (or using the `SyncPeriod` (in the manager options), since that is its purpose)
+   - Could also add the ability to fetch all objects immediately
+     - Reconcile always has to fetch the objects -> many GET requests
+     - Would go against general Kubernetes behavior, but would still fit in their model of eventual consistency
+     - Would have to think about how these objects are then represented (for example, would be handy to have the resources grouped by type or maybe even be able to choose in what format), but this could come from the use of a PoC
 
-Currently, most of the research has focussed on the first solution, in order to gain a wider understanding of the problem.
 
 ## Project structure
 ### External resources
@@ -56,7 +75,7 @@ All information is included in this repository. Everything relevant to the proto
 | 21/10 - 4/11 | <ul><li>Analyze Van Landuyt's K.'s operators for the wake-up behavior by investigating the code and traces</li><li>Compare the operator(/controller) architecture from Kubebuilder with kube.rs</li></ul> |
 | 4/11 - 18/11 | <ul><li>Compare the operator(/controller) architecture from Kubebuilder with kube.rs</li><li>Investigate how scheduled reconcilation is implemented and why</li></ul> |
 | 18/11 - 2/12| <ul><li>Run the WASM-prototype locally and investigate further</li><li>Find which parts of the Percona MongoDB operator enforce the use of scheduled reconcilation</li><li>Continue learning Kube.rs</li></ul> |
-| 2/12 - 16/12| <ul><li>Work toward prototype solution</li><li>Work on presentation</li></ul> |
+| 2/12 - 16/12| <ul><li>Work toward prototype solution</li><li>Work on presentation</li><li>Create first draft of thesis</li></ul> |
 
 ## Copyright
 This project is released under the Apache License Version 2.0.
