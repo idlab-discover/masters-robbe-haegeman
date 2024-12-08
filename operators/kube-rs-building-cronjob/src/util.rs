@@ -10,7 +10,7 @@ use std::{
 };
 
 use k8s_openapi::{api::batch::v1::Job, chrono::DateTime};
-use kube::{api::ObjectMeta, Resource, ResourceExt};
+use kube::{api::ObjectMeta, core::object::HasSpec, Resource, ResourceExt};
 
 use log::debug;
 
@@ -55,7 +55,7 @@ pub fn get_next_schedule(
     now: SystemTime,
 ) -> Result<(Option<SystemTime>, SystemTime), Error> {
     let schedule =
-        Schedule::from_str(&cronjob.spec.schedule).map_err(Error::CronScheduleParseError)?;
+        Schedule::from_str(&cronjob.spec().schedule).map_err(Error::CronScheduleParseError)?;
 
     // for optimization purposes, cheat a bit and start from our last observed run time
     // we could reconstitute this here, but there's not much point, since we've
@@ -77,7 +77,7 @@ pub fn get_next_schedule(
         );
     };
 
-    if let Some(starting_deadline_seconds) = cronjob.spec.starting_deadline_seconds {
+    if let Some(starting_deadline_seconds) = cronjob.spec().starting_deadline_seconds {
         if let Some(scheduling_deadline) = now
             .checked_sub(Duration::from_secs(
                 starting_deadline_seconds
@@ -151,11 +151,11 @@ pub fn construct_job_for_cron_job(
             namespace: cronjob.namespace().clone(),
             ..Default::default()
         },
-        spec: cronjob.spec.job_template.spec.clone(),
+        spec: cronjob.spec().job_template.spec.clone(),
         status: None,
     };
     const SCHEDULED_TIME_ANNOTATION: &str = "batch.tutorial.kube.rs/scheduled-at";
-    if let Some(job_template_meta) = &cronjob.spec.job_template.metadata {
+    if let Some(job_template_meta) = &cronjob.spec().job_template.metadata {
         if let Some(annotations) = &job_template_meta.annotations {
             for (key, value) in annotations {
                 job.annotations_mut().insert(key.clone(), value.clone());

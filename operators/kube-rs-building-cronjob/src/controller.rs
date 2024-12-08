@@ -1,4 +1,5 @@
 use k8s_openapi::api::core;
+use kube::core::object::{HasSpec, HasStatus};
 use std::cmp::Ordering;
 use std::sync::Arc;
 
@@ -112,7 +113,7 @@ pub async fn reconcile(g: Arc<crd::CronJob>, ctx: Arc<Context>) -> Result<Action
         }
     }
 
-    if let Some(ref mut status) = cronjob.status {
+    if let Some(status) = cronjob.status_mut() {
         status.last_schedule_time = most_recent_time.map(|time| meta::v1::Time(time.into()));
 
         let mut active: Vec<core::v1::ObjectReference> = vec![];
@@ -133,7 +134,7 @@ pub async fn reconcile(g: Arc<crd::CronJob>, ctx: Arc<Context>) -> Result<Action
     //////////////////////// 3: Clean up old jobs according to the history limit ////////////////////////
     // NB: deleting these are "best effort" -- if we fail on a particular one,
     // we won't requeue just to finish the deleting.
-    if let Some(failed_jobs_history_limit) = cronjob.spec.failed_jobs_history_limit {
+    if let Some(failed_jobs_history_limit) = cronjob.spec().failed_jobs_history_limit {
         failed_jobs.sort_by(|a, b| {
             match (
                 a.status.as_ref().map(|status| status.start_time.as_ref()),
@@ -160,7 +161,7 @@ pub async fn reconcile(g: Arc<crd::CronJob>, ctx: Arc<Context>) -> Result<Action
         }
     }
 
-    if let Some(successful_jobs_history_limit) = cronjob.spec.successful_jobs_history_limit {
+    if let Some(successful_jobs_history_limit) = cronjob.spec().successful_jobs_history_limit {
         successful_jobs.sort_by(|a, b| {
             match (
                 a.status.as_ref().map(|status| status.start_time.as_ref()),
@@ -188,7 +189,7 @@ pub async fn reconcile(g: Arc<crd::CronJob>, ctx: Arc<Context>) -> Result<Action
     }
 
     //////////////////////// 4: Check if we're suspended ////////////////////////
-    if cronjob.spec.suspend.unwrap_or(false) {
+    if cronjob.spec().suspend.unwrap_or(false) {
         info!("cronjob suspended, skipping");
         return Ok(Action::await_change());
     }
@@ -224,7 +225,7 @@ pub async fn reconcile(g: Arc<crd::CronJob>, ctx: Arc<Context>) -> Result<Action
 
     // make sure we're not too late to start the run
     info!("current run: {:?}", missed_run);
-    if let Some(starting_deadline_seconds) = cronjob.spec.starting_deadline_seconds {
+    if let Some(starting_deadline_seconds) = cronjob.spec().starting_deadline_seconds {
         if (missed_run + Duration::from_secs(starting_deadline_seconds as u64)) < ctx.clock.now() {
             info!("missed starting deadline for last run, sleeping till next");
             // TODO(directxman12): events
@@ -234,7 +235,7 @@ pub async fn reconcile(g: Arc<crd::CronJob>, ctx: Arc<Context>) -> Result<Action
 
     // figure out how to run this job -- concurrency policy might forbid us from running
     // multiple at the same time...
-    if cronjob.spec.concurrency_policy == ConcurrencyPolicy::Forbid && !active_jobs.is_empty() {
+    if cronjob.spec().concurrency_policy == ConcurrencyPolicy::Forbid && !active_jobs.is_empty() {
         info!(
             "concurrency policy blocks concurrent runs, skipping\nnum active: {}",
             active_jobs.len()
@@ -243,7 +244,7 @@ pub async fn reconcile(g: Arc<crd::CronJob>, ctx: Arc<Context>) -> Result<Action
     }
 
     // ...or instruct us to replace existing ones...
-    if cronjob.spec.concurrency_policy == ConcurrencyPolicy::Replace {
+    if cronjob.spec().concurrency_policy == ConcurrencyPolicy::Replace {
         for job in active_jobs {
             // we don't care if the job was already deleted
             if let Err(err) = job_api
