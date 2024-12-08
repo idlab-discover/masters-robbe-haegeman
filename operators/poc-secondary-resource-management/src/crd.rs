@@ -8,7 +8,9 @@ use serde::{Deserialize, Serialize};
 #[kube(group = "poc.sec.res", version = "v1", kind = "Database", namespaced)]
 #[kube(status = "DatabaseStatus", shortname = "db")]
 #[serde(rename_all = "camelCase")]
-pub struct DatabaseSpec {}
+pub struct DatabaseSpec {
+    pub backup_enabled: bool, // Normally part of another BackupSpec
+}
 
 #[derive(Debug, Serialize, Deserialize, Default, Clone, JsonSchema)]
 #[serde(rename_all = "camelCase")]

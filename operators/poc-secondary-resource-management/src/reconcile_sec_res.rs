@@ -4,6 +4,8 @@
 //! The code used here however is a simplification, just to test the solution
 use std::sync::Arc;
 
+use k8s_openapi::api::apps;
+
 use crate::{crd, error::Error, Context};
 
 // Placeholder for the real struct
@@ -16,7 +18,7 @@ pub struct ReplsetSpec {
 ///
 /// API requests:
 /// - patch to the CR
-pub async fn set_cr_version(_db: &mut crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
+pub async fn set_cr_version(_db: &crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
     Ok(())
 }
 
@@ -26,10 +28,13 @@ pub async fn set_cr_version(_db: &mut crd::Database, _ctx: Arc<Context>) -> Resu
 /// - None
 ///
 /// The code however uses this info to make a both a get and patch request to the
-pub async fn check_n_set_defaults(
-    _db: &mut crd::Database,
-    _ctx: Arc<Context>,
-) -> Result<(), Error> {
+pub async fn check_n_set_defaults(_db: &crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
+    Ok(())
+}
+
+/// Built in function from Kubebuilder
+/// Kube.rs supports Add and remove functions instead
+pub async fn set_finalizers(_db: &crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
     Ok(())
 }
 
@@ -42,7 +47,7 @@ pub async fn check_n_set_defaults(
 /// - Get request for secrets + Delete request for secrets
 /// - Get request for Pods + Delete request for Pods (db query router + replset)
 /// - Update request for CR
-pub async fn check_finalizers(_db: &mut crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
+pub async fn check_finalizers(_db: &crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
     Ok(())
 }
 
@@ -52,7 +57,7 @@ pub async fn check_finalizers(_db: &mut crd::Database, _ctx: Arc<Context>) -> Re
 /// - Get request for backup CR
 /// - Get request for statefulset (replset)
 /// - Get request for Pods + Delete request for Pods (db query router + replset)
-pub async fn reconcile_pause(_db: &mut crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
+pub async fn reconcile_pause(_db: &crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
     Ok(())
 }
 
@@ -61,7 +66,7 @@ pub async fn reconcile_pause(_db: &mut crd::Database, _ctx: Arc<Context>) -> Res
 ///
 /// API requests:
 /// - Get request for statefulset (cfg + database daemon)
-pub async fn check_configuration(_db: &mut crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
+pub async fn check_configuration(_db: &crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
     Ok(())
 }
 
@@ -69,8 +74,8 @@ pub async fn check_configuration(_db: &mut crd::Database, _ctx: Arc<Context>) ->
 ///
 /// API requests:
 /// - Get request for statefulset (replset)
-pub async fn safe_downscale(_db: &mut crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
-    Ok(())
+pub async fn safe_downscale(_db: &crd::Database, _ctx: Arc<Context>) -> Result<bool, Error> {
+    Ok(false)
 }
 
 /// Ensures the existence of the users' secret for the CR by attempting to retrieve it and creating it if it does not exist
@@ -78,10 +83,7 @@ pub async fn safe_downscale(_db: &mut crd::Database, _ctx: Arc<Context>) -> Resu
 /// API requests:
 /// - Get request for secret
 /// - Create request for secret
-pub async fn reconcile_user_secret(
-    _db: &mut crd::Database,
-    _ctx: Arc<Context>,
-) -> Result<(), Error> {
+pub async fn reconcile_user_secret(_db: &crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
     Ok(())
 }
 
@@ -90,8 +92,8 @@ pub async fn reconcile_user_secret(
 /// API requests:
 /// - Get request for config map
 /// - Create / update request for config map
-pub async fn reconcile_database_config_maps(
-    _db: &mut crd::Database,
+pub async fn reconcile_db_config_maps(
+    _db: &crd::Database,
     _ctx: Arc<Context>,
 ) -> Result<(), Error> {
     Ok(())
@@ -102,10 +104,10 @@ pub async fn reconcile_database_config_maps(
 /// API requests:
 /// - Get request for config map
 /// - Create / update request for config map
-pub async fn reconcile_database_daemon_config_maps(
-    _db: &mut crd::Database,
+pub async fn reconcile_db_daemon_config_maps(
+    _db: &crd::Database,
     _ctx: Arc<Context>,
-    _repls: Vec<ReplsetSpec>,
+    _repls: &mut [ReplsetSpec],
 ) -> Result<(), Error> {
     Ok(())
 }
@@ -114,7 +116,11 @@ pub async fn reconcile_database_daemon_config_maps(
 ///
 /// API requests:
 /// - Get request for secret (users + internal)
-pub async fn reconcile_users(_db: &mut crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
+pub async fn reconcile_users(
+    _db: &crd::Database,
+    _ctx: Arc<Context>,
+    _repls: &mut [ReplsetSpec],
+) -> Result<(), Error> {
     Ok(())
 }
 
@@ -122,8 +128,11 @@ pub async fn reconcile_users(_db: &mut crd::Database, _ctx: Arc<Context>) -> Res
 ///
 /// API requests:
 /// - Get request for statefulset (replset)
-pub async fn get_sts_for_removal(_db: &mut crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
-    Ok(())
+pub async fn get_sts_for_removal(
+    _db: &crd::Database,
+    _ctx: Arc<Context>,
+) -> Result<Vec<apps::v1::StatefulSet>, Error> {
+    Ok(vec![])
 }
 
 /// Connects to database system, makes sure only system databases are present and errors if not
@@ -131,7 +140,7 @@ pub async fn get_sts_for_removal(_db: &mut crd::Database, _ctx: Arc<Context>) ->
 /// API requests:
 /// - None
 pub async fn check_if_possible_to_remove(
-    _db: &mut crd::Database,
+    _db: &crd::Database,
     _ctx: Arc<Context>,
     _rs_name: &str,
 ) -> Result<(), Error> {
@@ -143,7 +152,7 @@ pub async fn check_if_possible_to_remove(
 /// API requests:
 /// - None
 pub async fn remove_rs_from_shard(
-    _db: &mut crd::Database,
+    _db: &crd::Database,
     _ctx: Arc<Context>,
     _rs_name: &str,
 ) -> Result<(), Error> {
@@ -155,7 +164,7 @@ pub async fn remove_rs_from_shard(
 /// API requests:
 /// - Get request for secret (SSL)
 /// - Create request for secret (SSL)
-pub async fn reconcile_ssl(_db: &mut crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
+pub async fn reconcile_ssl(_db: &crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
     Ok(())
 }
 
@@ -164,7 +173,7 @@ pub async fn reconcile_ssl(_db: &mut crd::Database, _ctx: Arc<Context>) -> Resul
 /// API requests:
 /// - Get request for secret
 /// - Create request for secret
-pub async fn ensure_security_key(_db: &mut crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
+pub async fn ensure_security_key(_db: &crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
     Ok(())
 }
 
@@ -173,10 +182,7 @@ pub async fn ensure_security_key(_db: &mut crd::Database, _ctx: Arc<Context>) ->
 /// API requests:
 /// - Get request for cron job
 /// - Create / update request for cron job
-pub async fn reconcile_backup_tasks(
-    _db: &mut crd::Database,
-    _ctx: Arc<Context>,
-) -> Result<(), Error> {
+pub async fn reconcile_backup_tasks(_db: &crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
     Ok(())
 }
 
@@ -192,9 +198,9 @@ pub async fn reconcile_backup_tasks(
 /// - Get request for services
 /// - Create / update request for services
 pub async fn reconcile_repl_sets(
-    _db: &mut crd::Database,
+    _db: &crd::Database,
     _ctx: Arc<Context>,
-    _repls: Vec<ReplsetSpec>,
+    _repls: &mut [ReplsetSpec],
 ) -> Result<(), Error> {
     Ok(())
 }
@@ -206,7 +212,7 @@ pub async fn reconcile_repl_sets(
 /// - Delete request for statefulset
 /// - Delete request for config map
 pub async fn reconcile_db_query_router(
-    _db: &mut crd::Database,
+    _db: &crd::Database,
     _ctx: Arc<Context>,
 ) -> Result<(), Error> {
     Ok(())
@@ -217,10 +223,7 @@ pub async fn reconcile_db_query_router(
 /// API requests:
 /// - Get request for statefulset
 /// - Get request for pods
-pub async fn upgrade_fcv_if_needed(
-    _db: &mut crd::Database,
-    _ctx: Arc<Context>,
-) -> Result<(), Error> {
+pub async fn upgrade_fcv_if_needed(_db: &crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
     Ok(())
 }
 
@@ -231,7 +234,7 @@ pub async fn upgrade_fcv_if_needed(
 /// - Get request for pods
 /// - Get request for PVCs
 /// - Delete request for PVCs
-pub async fn delete_orphan_pvcs(_db: &mut crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
+pub async fn delete_orphan_pvcs(_db: &crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
     Ok(())
 }
 
@@ -240,10 +243,7 @@ pub async fn delete_orphan_pvcs(_db: &mut crd::Database, _ctx: Arc<Context>) -> 
 /// API requests:
 /// - Get request for secrets (internal user secret + external)
 /// - Create / Update request for secrets (external user secret)
-pub async fn reconcile_custom_users(
-    _db: &mut crd::Database,
-    _ctx: Arc<Context>,
-) -> Result<(), Error> {
+pub async fn reconcile_custom_users(_db: &crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
     Ok(())
 }
 
@@ -254,7 +254,20 @@ pub async fn reconcile_custom_users(
 /// - Get request for services
 /// - Delete request for service exports (a CR managed by MCS (Multi-Cluster Service))
 /// - Delete request for services
-pub async fn export_services(_db: &mut crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
+pub async fn export_services(_db: &crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
+    Ok(())
+}
+
+/// Ensures the version of the operator is up to date based on the custom resource's (CR) UpgradeOptions.Schedule
+///
+/// API requests:
+/// - Manages cronjobs, but not sure if this is through Kubernetes or in the operator itself
+/// - Get request for CR
+/// - Get request for pod, replicaset and deployment of operator
+pub async fn schedule_ensure_function(
+    _db: &crd::Database,
+    _ctx: Arc<Context>,
+) -> Result<(), Error> {
     Ok(())
 }
 
@@ -262,7 +275,7 @@ pub async fn export_services(_db: &mut crd::Database, _ctx: Arc<Context>) -> Res
 ///
 /// API requests:
 /// - Get request for restore CR
-pub async fn update_pitr(_db: &mut crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
+pub async fn update_pitr(_db: &crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
     Ok(())
 }
 
@@ -273,7 +286,7 @@ pub async fn update_pitr(_db: &mut crd::Database, _ctx: Arc<Context>) -> Result<
 /// - Patch request for database CR
 /// - Get request for pod
 pub async fn resync_backup_solution_if_needed(
-    _db: &mut crd::Database,
+    _db: &crd::Database,
     _ctx: Arc<Context>,
 ) -> Result<(), Error> {
     Ok(())
@@ -283,6 +296,6 @@ pub async fn resync_backup_solution_if_needed(
 ///
 /// API requests:
 /// - Update request for CR
-pub async fn update_status(_db: &mut crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
+pub async fn update_status(_db: &crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
     Ok(())
 }
