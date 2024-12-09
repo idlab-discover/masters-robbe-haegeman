@@ -4,7 +4,7 @@
 ### Current progress
 - Research tracing solutions for Kubernetes operators
 - Go through Kubebuilder guide and build custom operator
-  - Found a nice visualization of the general controller setup
+  - Found a nice visualization of the general controller setup ([Kubebuilder: architecture concept diagram](./attachments/architecture_concept_diagram.svg))
 - Setup the Percona PostgreSQL operator
 - Setup the ArangoDB operator
   - Local instance
