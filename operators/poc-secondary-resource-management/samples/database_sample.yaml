@@ -1,0 +1,10 @@
+apiVersion: poc.sec.res/v1
+kind: Database
+metadata:
+  labels:
+    app.kubernetes.io/name: project
+    app.kubernetes.io/managed-by: kustomize
+  name: database-sample
+spec:
+  backupEnabled: false
+  CRVersion: ""
