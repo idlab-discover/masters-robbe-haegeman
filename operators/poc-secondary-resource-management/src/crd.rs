@@ -9,6 +9,8 @@ use serde::{Deserialize, Serialize};
 #[kube(status = "DatabaseStatus", shortname = "db")]
 #[serde(rename_all = "camelCase")]
 pub struct DatabaseSpec {
+    #[serde(rename = "CRVersion")]
+    pub cr_version: String,
     pub backup_enabled: bool, // Normally part of another BackupSpec
 }
 
