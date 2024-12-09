@@ -2,11 +2,14 @@
 //! This list isn't exhaustive and is more of a example of a possible implementation of the Reconcile function
 //! The documentation above each function is a summary of the workings of the original code
 //! The code used here however is a simplification, just to test the solution
-use std::sync::Arc;
+use std::{collections::BTreeMap, sync::Arc};
 
-use k8s_openapi::api::apps;
+use k8s_openapi::{
+    api::{apps, core},
+    ByteString,
+};
 use kube::{
-    api::{Patch, PatchParams},
+    api::{ObjectMeta, Patch, PatchParams, PostParams},
     core::object::HasSpec,
     Api, ResourceExt,
 };
@@ -42,10 +45,9 @@ pub async fn set_cr_version(db: &crd::Database, ctx: Arc<Context>) -> Result<(),
         // this could result in changing more values due to an outdated db
         let patch = Patch::Merge(patch);
         // TODO: check if the object gets updated or if we have to update db manually each time
-        let _db = db_api
+        db_api
             .patch(&db.name_any(), &PatchParams::apply(&db.name_any()), &patch)
-            .await
-            .map_err(Error::KubeError)?;
+            .await?;
     }
     Ok(())
 }
@@ -114,8 +116,56 @@ pub async fn safe_downscale(_db: &crd::Database, ctx: Arc<Context>) -> Result<bo
 /// API requests:
 /// - Get request for secret
 /// - Create request for secret
-pub async fn reconcile_user_secret(_db: &crd::Database, ctx: Arc<Context>) -> Result<(), Error> {
-    let _client = &ctx.client;
+/// - Patch request for secret
+pub async fn reconcile_user_secret(db: &crd::Database, ctx: Arc<Context>) -> Result<(), Error> {
+    let client = &ctx.client;
+    let secret_name = "user-secret";
+
+    log::info!("Reconciling user-secret");
+
+    let now = chrono::Local::now().to_rfc3339();
+
+    let secret_api: Api<core::v1::Secret> = Api::namespaced(
+        client.clone(),
+        &db.namespace().unwrap_or(String::from("default")),
+    );
+
+    if let Some(secret) = secret_api.get_opt(secret_name).await? {
+        // Update the timestamp if the secret is already created
+        let patch = serde_json::json!({
+           "data": {
+                "timestamp": ByteString(now.into_bytes())
+            }
+        });
+        // Using the object itself to create a patch is also possible, but due to the lack of a "MergeFrom" method,
+        // this could result in changing more values due to an outdated db
+        let patch = Patch::Merge(patch);
+        secret_api
+            .patch(
+                &secret.name_any(),
+                &PatchParams::apply(&db.name_any()),
+                &patch,
+            )
+            .await?;
+    } else {
+        // Create secret if not yet present
+        let secret = core::v1::Secret {
+            metadata: ObjectMeta {
+                name: Some(String::from(secret_name)), // Secret name
+                namespace: Some(db.namespace().unwrap_or(String::from("default"))), // Namespace
+                ..Default::default()
+            },
+            data: {
+                let mut data_map = BTreeMap::new();
+                data_map.insert(String::from("timestamp"), ByteString(now.into_bytes()));
+                Some(data_map)
+            },
+            ..Default::default()
+        };
+
+        secret_api.create(&PostParams::default(), &secret).await?;
+    }
+
     Ok(())
 }
 
