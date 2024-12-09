@@ -25,7 +25,7 @@ pub async fn run(ctx: Arc<Context>) {
     let client = ctx.client.clone();
     let api: Api<crd::Database> = Api::all(client.clone());
 
-    Controller::new(api.clone(), watcher::Config::default())
+    Controller::new(api, watcher::Config::default())
         .shutdown_on_signal()
         .run(reconcile, error_policy, ctx)
         .filter_map(|x| async move { std::result::Result::ok(x) })
@@ -47,10 +47,7 @@ pub async fn reconcile(g: Arc<crd::Database>, ctx: Arc<Context>) -> Result<Actio
 
     // Fetch the Database instance
     let db_api: Api<crd::Database> = Api::namespaced(client.clone(), &ns);
-    let db = db_api
-        .get(&g.name_any())
-        .await
-        .map_err(Error::KubeGetError)?;
+    let db = db_api.get(&g.name_any()).await.map_err(Error::KubeError)?;
 
     // We don't have to have explicit error handling, since the default error_policy can be set to the same value as is used in the Percona operator
     // The functions below are the ones used in the Reconcile function of the ReconcilePerconaServerMongoDB object
@@ -66,6 +63,7 @@ pub async fn reconcile(g: Arc<crd::Database>, ctx: Arc<Context>) -> Result<Actio
         return Ok(Action::await_change());
     };
 
+    // We will currently not handle this case (PoC)
     if db.metadata.deletion_timestamp.is_some()
         && reconcile_sec_res::check_finalizers(&db, ctx.clone())
             .await
@@ -139,6 +137,7 @@ pub async fn reconcile(g: Arc<crd::Database>, ctx: Arc<Context>) -> Result<Actio
     rr
 }
 
-pub fn error_policy(_obj: Arc<crd::Database>, _error: &Error, _ctx: Arc<Context>) -> Action {
+pub fn error_policy(_obj: Arc<crd::Database>, error: &Error, _ctx: Arc<Context>) -> Action {
+    log::error!("Error occurred: {error:?}");
     Action::await_change()
 }
