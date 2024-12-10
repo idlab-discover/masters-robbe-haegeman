@@ -1,7 +1,8 @@
 use crate::error::{Error, Result};
 use kube::{
-    api::{DynamicObject, PostParams},
-    Api, Client,
+    api::{ApiResource, DynamicObject, PostParams},
+    core::object::HasStatus,
+    Api, Client, ResourceExt,
 };
 use kube_derive::CustomResource;
 use schemars::JsonSchema;
@@ -27,30 +28,57 @@ pub struct DatabaseStatus {
     pub sec_recs: Vec<DynamicObject>,
 }
 
-impl PrimaryResource for Database {}
+impl PrimaryResource for Database {
+    fn secondary_resources(&self) -> Result<&Vec<DynamicObject>> {
+        Ok(&self
+            .status()
+            .ok_or(Error::MissingStatusError(self.name_any()))?
+            .sec_recs)
+    }
+
+    fn secondary_resources_mut(&mut self) -> Result<&mut Vec<DynamicObject>> {
+        let name = self.name_any().clone();
+        if let Some(status) = self.status_mut() {
+            return Ok(&mut status.sec_recs);
+        }
+        Err(Error::MissingStatusError(name))
+    }
+}
 
 pub(crate) trait PrimaryResource: kube::ResourceExt {
+    fn secondary_resources(&self) -> Result<&Vec<DynamicObject>>;
+    fn secondary_resources_mut(&mut self) -> Result<&mut Vec<DynamicObject>>;
+
     async fn create_secondary<
-        T: kube::Resource<Scope = k8s_openapi::NamespaceResourceScope>
+        K: kube::Resource<Scope = k8s_openapi::NamespaceResourceScope, DynamicType = K>
             + Clone
             + Debug
             + Serialize
             + DeserializeOwned,
     >(
-        &self,
+        &mut self,
         client: Client,
         pp: &mut PostParams,
-        data: &T,
-    ) -> Result<T>
+        data: &K,
+    ) -> Result<K>
     where
-        <T as kube::Resource>::DynamicType: Default,
+        <K as kube::Resource>::DynamicType: Default,
     {
-        let secondary_api: Api<T> =
+        let secondary_api: Api<K> =
             Api::namespaced(client, &self.namespace().unwrap_or(String::from("default")));
 
-        secondary_api
+        let res = secondary_api
             .create(pp, data)
             .await
-            .map_err(Error::KubeError)
+            .map_err(Error::KubeError)?;
+
+        self.secondary_resources_mut()
+            .unwrap()
+            .push(DynamicObject::new(
+                &res.name_any(),
+                &ApiResource::erase::<K>(&res),
+            ));
+
+        Ok(res)
     }
 }
