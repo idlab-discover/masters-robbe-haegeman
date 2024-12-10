@@ -14,7 +14,7 @@ use kube::{
     Api, ResourceExt,
 };
 
-use crate::{crd, error::Error, Context};
+use crate::{crd, error::Result, Context};
 
 // Placeholder for the real struct
 pub struct ReplsetSpec {
@@ -26,7 +26,7 @@ pub struct ReplsetSpec {
 ///
 /// API requests:
 /// - patch to the CR
-pub async fn set_cr_version(db: &crd::Database, ctx: Arc<Context>) -> Result<(), Error> {
+pub async fn set_cr_version(db: &crd::Database, ctx: Arc<Context>) -> Result<()> {
     let client = &ctx.client;
 
     let db_api: Api<crd::Database> = Api::namespaced(
@@ -58,13 +58,13 @@ pub async fn set_cr_version(db: &crd::Database, ctx: Arc<Context>) -> Result<(),
 /// - None
 ///
 /// The code however uses this info to make a both a get and patch request to the
-pub async fn check_n_set_defaults(_db: &crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
+pub async fn check_n_set_defaults(_db: &crd::Database, _ctx: Arc<Context>) -> Result<()> {
     Ok(())
 }
 
 /// Built in function from Kubebuilder
 /// Kube.rs supports Add and remove functions instead
-pub async fn set_finalizers(_db: &crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
+pub async fn set_finalizers(_db: &crd::Database, _ctx: Arc<Context>) -> Result<()> {
     Ok(())
 }
 
@@ -77,7 +77,7 @@ pub async fn set_finalizers(_db: &crd::Database, _ctx: Arc<Context>) -> Result<(
 /// - Get request for secrets + Delete request for secrets
 /// - Get request for Pods + Delete request for Pods (db query router + replset)
 /// - Update request for CR
-pub async fn check_finalizers(_db: &crd::Database, _ctx: Arc<Context>) -> Result<(), Error> {
+pub async fn check_finalizers(_db: &crd::Database, _ctx: Arc<Context>) -> Result<()> {
     Ok(())
 }
 
@@ -87,7 +87,7 @@ pub async fn check_finalizers(_db: &crd::Database, _ctx: Arc<Context>) -> Result
 /// - Get request for backup CR
 /// - Get request for statefulset (replset)
 /// - Get request for Pods + Delete request for Pods (db query router + replset)
-pub async fn reconcile_pause(_db: &crd::Database, ctx: Arc<Context>) -> Result<(), Error> {
+pub async fn reconcile_pause(_db: &crd::Database, ctx: Arc<Context>) -> Result<()> {
     let _client = &ctx.client;
     Ok(())
 }
@@ -97,7 +97,7 @@ pub async fn reconcile_pause(_db: &crd::Database, ctx: Arc<Context>) -> Result<(
 ///
 /// API requests:
 /// - Get request for statefulset (cfg + database daemon)
-pub async fn check_configuration(_db: &crd::Database, ctx: Arc<Context>) -> Result<(), Error> {
+pub async fn check_configuration(_db: &crd::Database, ctx: Arc<Context>) -> Result<()> {
     let _client = &ctx.client;
     Ok(())
 }
@@ -106,7 +106,7 @@ pub async fn check_configuration(_db: &crd::Database, ctx: Arc<Context>) -> Resu
 ///
 /// API requests:
 /// - Get request for statefulset (replset)
-pub async fn safe_downscale(_db: &crd::Database, ctx: Arc<Context>) -> Result<bool, Error> {
+pub async fn safe_downscale(_db: &crd::Database, ctx: Arc<Context>) -> Result<bool> {
     let _client = &ctx.client;
     Ok(false)
 }
@@ -117,7 +117,7 @@ pub async fn safe_downscale(_db: &crd::Database, ctx: Arc<Context>) -> Result<bo
 /// - Get request for secret
 /// - Create request for secret
 /// - Patch request for secret
-pub async fn reconcile_user_secret(db: &crd::Database, ctx: Arc<Context>) -> Result<(), Error> {
+pub async fn reconcile_user_secret(db: &crd::Database, ctx: Arc<Context>) -> Result<()> {
     let client = &ctx.client;
     let secret_name = "user-secret";
 
@@ -174,7 +174,7 @@ pub async fn reconcile_user_secret(db: &crd::Database, ctx: Arc<Context>) -> Res
 /// API requests:
 /// - Get request for config map
 /// - Create / update request for config map
-pub async fn reconcile_db_config_maps(_db: &crd::Database, ctx: Arc<Context>) -> Result<(), Error> {
+pub async fn reconcile_db_config_maps(_db: &crd::Database, ctx: Arc<Context>) -> Result<()> {
     let _client = &ctx.client;
     Ok(())
 }
@@ -188,7 +188,7 @@ pub async fn reconcile_db_daemon_config_maps(
     _db: &crd::Database,
     ctx: Arc<Context>,
     _repls: &mut [ReplsetSpec],
-) -> Result<(), Error> {
+) -> Result<()> {
     let _client = &ctx.client;
     Ok(())
 }
@@ -201,7 +201,7 @@ pub async fn reconcile_users(
     _db: &crd::Database,
     ctx: Arc<Context>,
     _repls: &mut [ReplsetSpec],
-) -> Result<(), Error> {
+) -> Result<()> {
     let _client = &ctx.client;
     Ok(())
 }
@@ -213,7 +213,7 @@ pub async fn reconcile_users(
 pub async fn get_sts_for_removal(
     _db: &crd::Database,
     ctx: Arc<Context>,
-) -> Result<Vec<apps::v1::StatefulSet>, Error> {
+) -> Result<Vec<apps::v1::StatefulSet>> {
     let _client = &ctx.client;
     Ok(vec![])
 }
@@ -226,7 +226,7 @@ pub async fn check_if_possible_to_remove(
     _db: &crd::Database,
     ctx: Arc<Context>,
     _rs_name: &str,
-) -> Result<(), Error> {
+) -> Result<()> {
     let _client = &ctx.client;
     Ok(())
 }
@@ -239,7 +239,7 @@ pub async fn remove_rs_from_shard(
     _db: &crd::Database,
     ctx: Arc<Context>,
     _rs_name: &str,
-) -> Result<(), Error> {
+) -> Result<()> {
     let _client = &ctx.client;
     Ok(())
 }
@@ -249,7 +249,7 @@ pub async fn remove_rs_from_shard(
 /// API requests:
 /// - Get request for secret (SSL)
 /// - Create request for secret (SSL)
-pub async fn reconcile_ssl(_db: &crd::Database, ctx: Arc<Context>) -> Result<(), Error> {
+pub async fn reconcile_ssl(_db: &crd::Database, ctx: Arc<Context>) -> Result<()> {
     let _client = &ctx.client;
     Ok(())
 }
@@ -259,7 +259,7 @@ pub async fn reconcile_ssl(_db: &crd::Database, ctx: Arc<Context>) -> Result<(),
 /// API requests:
 /// - Get request for secret
 /// - Create request for secret
-pub async fn ensure_security_key(_db: &crd::Database, ctx: Arc<Context>) -> Result<(), Error> {
+pub async fn ensure_security_key(_db: &crd::Database, ctx: Arc<Context>) -> Result<()> {
     let _client = &ctx.client;
     Ok(())
 }
@@ -269,7 +269,7 @@ pub async fn ensure_security_key(_db: &crd::Database, ctx: Arc<Context>) -> Resu
 /// API requests:
 /// - Get request for cron job
 /// - Create / update request for cron job
-pub async fn reconcile_backup_tasks(_db: &crd::Database, ctx: Arc<Context>) -> Result<(), Error> {
+pub async fn reconcile_backup_tasks(_db: &crd::Database, ctx: Arc<Context>) -> Result<()> {
     let _client = &ctx.client;
     Ok(())
 }
@@ -289,7 +289,7 @@ pub async fn reconcile_repl_sets(
     _db: &crd::Database,
     ctx: Arc<Context>,
     _repls: &mut [ReplsetSpec],
-) -> Result<(), Error> {
+) -> Result<()> {
     let _client = &ctx.client;
     Ok(())
 }
@@ -300,10 +300,7 @@ pub async fn reconcile_repl_sets(
 /// - Get request for statefulset
 /// - Delete request for statefulset
 /// - Delete request for config map
-pub async fn reconcile_db_query_router(
-    _db: &crd::Database,
-    ctx: Arc<Context>,
-) -> Result<(), Error> {
+pub async fn reconcile_db_query_router(_db: &crd::Database, ctx: Arc<Context>) -> Result<()> {
     let _client = &ctx.client;
     Ok(())
 }
@@ -313,7 +310,7 @@ pub async fn reconcile_db_query_router(
 /// API requests:
 /// - Get request for statefulset
 /// - Get request for pods
-pub async fn upgrade_fcv_if_needed(_db: &crd::Database, ctx: Arc<Context>) -> Result<(), Error> {
+pub async fn upgrade_fcv_if_needed(_db: &crd::Database, ctx: Arc<Context>) -> Result<()> {
     let _client = &ctx.client;
     Ok(())
 }
@@ -325,7 +322,7 @@ pub async fn upgrade_fcv_if_needed(_db: &crd::Database, ctx: Arc<Context>) -> Re
 /// - Get request for pods
 /// - Get request for PVCs
 /// - Delete request for PVCs
-pub async fn delete_orphan_pvcs(_db: &crd::Database, ctx: Arc<Context>) -> Result<(), Error> {
+pub async fn delete_orphan_pvcs(_db: &crd::Database, ctx: Arc<Context>) -> Result<()> {
     let _client = &ctx.client;
     Ok(())
 }
@@ -335,7 +332,7 @@ pub async fn delete_orphan_pvcs(_db: &crd::Database, ctx: Arc<Context>) -> Resul
 /// API requests:
 /// - Get request for secrets (internal user secret + external)
 /// - Create / Update request for secrets (external user secret)
-pub async fn reconcile_custom_users(_db: &crd::Database, ctx: Arc<Context>) -> Result<(), Error> {
+pub async fn reconcile_custom_users(_db: &crd::Database, ctx: Arc<Context>) -> Result<()> {
     let _client = &ctx.client;
     Ok(())
 }
@@ -347,7 +344,7 @@ pub async fn reconcile_custom_users(_db: &crd::Database, ctx: Arc<Context>) -> R
 /// - Get request for services
 /// - Delete request for service exports (a CR managed by MCS (Multi-Cluster Service))
 /// - Delete request for services
-pub async fn export_services(_db: &crd::Database, ctx: Arc<Context>) -> Result<(), Error> {
+pub async fn export_services(_db: &crd::Database, ctx: Arc<Context>) -> Result<()> {
     let _client = &ctx.client;
     Ok(())
 }
@@ -358,7 +355,7 @@ pub async fn export_services(_db: &crd::Database, ctx: Arc<Context>) -> Result<(
 /// - Manages cronjobs, but not sure if this is through Kubernetes or in the operator itself
 /// - Get request for CR
 /// - Get request for pod, replicaset and deployment of operator
-pub async fn schedule_ensure_function(_db: &crd::Database, ctx: Arc<Context>) -> Result<(), Error> {
+pub async fn schedule_ensure_function(_db: &crd::Database, ctx: Arc<Context>) -> Result<()> {
     let _client = &ctx.client;
     Ok(())
 }
@@ -367,7 +364,7 @@ pub async fn schedule_ensure_function(_db: &crd::Database, ctx: Arc<Context>) ->
 ///
 /// API requests:
 /// - Get request for restore CR
-pub async fn update_pitr(_db: &crd::Database, ctx: Arc<Context>) -> Result<(), Error> {
+pub async fn update_pitr(_db: &crd::Database, ctx: Arc<Context>) -> Result<()> {
     let _client = &ctx.client;
     Ok(())
 }
@@ -381,7 +378,7 @@ pub async fn update_pitr(_db: &crd::Database, ctx: Arc<Context>) -> Result<(), E
 pub async fn resync_backup_solution_if_needed(
     _db: &crd::Database,
     ctx: Arc<Context>,
-) -> Result<(), Error> {
+) -> Result<()> {
     let _client = &ctx.client;
     Ok(())
 }
@@ -390,7 +387,7 @@ pub async fn resync_backup_solution_if_needed(
 ///
 /// API requests:
 /// - Update request for CR
-pub async fn update_status(_db: &crd::Database, ctx: Arc<Context>) -> Result<(), Error> {
+pub async fn update_status(_db: &crd::Database, ctx: Arc<Context>) -> Result<()> {
     let _client = &ctx.client;
     Ok(())
 }

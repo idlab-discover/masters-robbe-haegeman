@@ -2,7 +2,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use crate::crd::{self};
-use crate::error::Error;
+use crate::error::{Error, Result};
 use crate::reconcile_sec_res;
 use futures::StreamExt;
 use k8s_openapi::api::apps;
@@ -33,7 +33,7 @@ pub async fn run(ctx: Arc<Context>) {
         .await;
 }
 
-pub async fn reconcile(g: Arc<crd::Database>, ctx: Arc<Context>) -> Result<Action, Error> {
+pub async fn reconcile(g: Arc<crd::Database>, ctx: Arc<Context>) -> Result<Action> {
     let client = &ctx.client;
 
     let ns = g

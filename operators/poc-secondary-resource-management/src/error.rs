@@ -7,3 +7,5 @@ pub enum Error {
     #[error("Label missing for {0}")]
     MissingLabelError(String),
 }
+
+pub type Result<T, E = Error> = std::result::Result<T, E>;
