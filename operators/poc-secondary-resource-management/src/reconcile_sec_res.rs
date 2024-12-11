@@ -14,7 +14,11 @@ use kube::{
     Api, ResourceExt,
 };
 
-use crate::{crd, error::Result, Context};
+use crate::{
+    crd::{self, PrimaryResource},
+    error::Result,
+    Context,
+};
 
 // Placeholder for the real struct
 pub struct ReplsetSpec {
@@ -117,7 +121,7 @@ pub async fn safe_downscale(_db: &crd::Database, ctx: Arc<Context>) -> Result<bo
 /// - Get request for secret
 /// - Create request for secret
 /// - Patch request for secret
-pub async fn reconcile_user_secret(db: &crd::Database, ctx: Arc<Context>) -> Result<()> {
+pub async fn reconcile_user_secret(db: &mut crd::Database, ctx: Arc<Context>) -> Result<()> {
     let client = &ctx.client;
     let secret_name = "user-secret";
 
@@ -163,7 +167,11 @@ pub async fn reconcile_user_secret(db: &crd::Database, ctx: Arc<Context>) -> Res
             ..Default::default()
         };
 
-        secret_api.create(&PostParams::default(), &secret).await?;
+        db.initialize_status();
+
+        // secret_api.create(&PostParams::default(), &secret).await?;
+        db.create_secondary(client.clone(), &mut PostParams::default(), &secret)
+            .await?;
     }
 
     Ok(())

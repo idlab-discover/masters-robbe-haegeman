@@ -47,7 +47,7 @@ pub async fn reconcile(g: Arc<crd::Database>, ctx: Arc<Context>) -> Result<Actio
 
     // Fetch the Database instance
     let db_api: Api<crd::Database> = Api::namespaced(client.clone(), &ns);
-    let db = db_api.get(&g.name_any()).await.map_err(Error::KubeError)?;
+    let mut db = db_api.get(&g.name_any()).await.map_err(Error::KubeError)?;
 
     // We don't have to have explicit error handling, since the default error_policy can be set to the same value as is used in the Percona operator
     // The functions below are the ones used in the Reconcile function of the ReconcilePerconaServerMongoDB object
@@ -75,7 +75,7 @@ pub async fn reconcile(g: Arc<crd::Database>, ctx: Arc<Context>) -> Result<Actio
     reconcile_sec_res::reconcile_pause(&db, ctx.clone()).await?;
     reconcile_sec_res::check_configuration(&db, ctx.clone()).await?;
     let is_downscale = reconcile_sec_res::safe_downscale(&db, ctx.clone()).await?;
-    reconcile_sec_res::reconcile_user_secret(&db, ctx.clone()).await?;
+    reconcile_sec_res::reconcile_user_secret(&mut db, ctx.clone()).await?;
 
     let mut repls = Vec::<reconcile_sec_res::ReplsetSpec>::new();
     reconcile_sec_res::reconcile_db_daemon_config_maps(&db, ctx.clone(), &mut repls).await?;
@@ -134,7 +134,8 @@ pub async fn reconcile(g: Arc<crd::Database>, ctx: Arc<Context>) -> Result<Actio
         log::error!("Failed to update cluster status. Err: {err}");
     };
 
-    rr
+    // rr
+    Ok(Action::await_change())
 }
 
 pub fn error_policy(_obj: Arc<crd::Database>, error: &Error, _ctx: Arc<Context>) -> Action {
