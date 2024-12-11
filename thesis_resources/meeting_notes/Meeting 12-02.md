@@ -1,5 +1,4 @@
-# Notes - Meeting 01/12/24
-
+# Notes - Meeting 02/12/24
 ## Preparation
 ### Current progress
 - Follow the [Kubebuilder tutorial: Building Cronjob](https://book.kubebuilder.io/cronjob-tutorial/cronjob-tutorial) with kube.rs

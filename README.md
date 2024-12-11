@@ -1,4 +1,6 @@
 # Master thesis project - Edge Kubernetes with WebAssembly
+<img src="./thesis_resources/meeting_notes/attachments/mascot.png" width="200" />
+
 ## Overview
 This repository contains resources for my master's thesis focused on optimizing Kubernetes operators for edge orchestration using WebAssembly.  
 Building on the prototype of Ramlot T. and Van Landuyt K., this project aims to find alternative solutions to wake-up behavior in operators, causing inefficiencies within the WebAssembly-based environment.
@@ -75,7 +77,8 @@ All information is included in this repository. Everything relevant to the proto
 | 21/10 - 4/11 | <ul><li>Analyze Van Landuyt's K.'s operators for the wake-up behavior by investigating the code and traces</li><li>Compare the operator(/controller) architecture from Kubebuilder with kube.rs</li></ul> |
 | 4/11 - 18/11 | <ul><li>Compare the operator(/controller) architecture from Kubebuilder with kube.rs</li><li>Investigate how scheduled reconcilation is implemented and why</li></ul> |
 | 18/11 - 2/12| <ul><li>Run the WASM-prototype locally and investigate further</li><li>Find which parts of the Percona MongoDB operator enforce the use of scheduled reconcilation</li><li>Continue learning Kube.rs</li></ul> |
-| 2/12 - 16/12| <ul><li>Work toward prototype solution</li><li>Work on presentation</li><li>Create first draft of thesis</li></ul> |
+| 2/12 - 11/12| <ul><li>Work toward prototype solution</li><li>Work on presentation</li><li>Create first draft of thesis</li></ul> |
+| 11/12 - 19/12| <ul><li>Add automatic watches to PoC</li><li>Implement feedback presentation</li><li>Create first draft of thesis</li></ul> |
 
 ## Copyright
 This project is released under the Apache License Version 2.0.
