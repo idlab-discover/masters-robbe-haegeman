@@ -1,5 +1,5 @@
 # This all is a workaround for the [lack of YAML anchors in Github Actions](https://github.com/actions/runner/issues/1182).
-# Once those are added, this file can be merged with /reusable/schedule.yml
+# Once those are added, this file can be merged with /schedule.yml
 name: scheduled execute
 
 permissions:
@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   use-reusable:
-    uses: ./.github/workflows/reusable/scheduled.yml
+    uses: ./.github/workflows/scheduled.yml
     with:
       directories: |
         operators/kube-rs-building-cronjob/**
