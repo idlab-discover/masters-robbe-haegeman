@@ -5,6 +5,10 @@ updates:
     schedule:
       interval: weekly
   - package-ecosystem: cargo
-    directory: /
+    directory: /operators/kube-rs-building-cronjob
+    schedule:
+      interval: weekly
+  - package-ecosystem: cargo
+    directory: /operators/poc-secondary-resource-management
     schedule:
       interval: weekly

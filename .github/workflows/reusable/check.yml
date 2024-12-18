@@ -7,23 +7,32 @@
 # - msrv: check that the msrv specified in the crate is correct
 permissions:
   contents: read
-# This configuration allows maintainers of this repo to create a branch and pull request based on
-# the new branch. Restricting the push trigger to the main branch ensures that the PR only gets
-# built once.
+
+# This all is a workaround for the [lack of YAML anchors in Github Actions](https://github.com/actions/runner/issues/1182).
+# Once those are added, this file can be merged with /check_config.yml
 on:
-  push:
-    branches: [main]
-  pull_request:
-# If new code is pushed to a PR branch, then cancel in progress workflows for that PR. Ensures that
-# we don't waste CI time, and returns results quicker https://github.com/jonhoo/rust-ci-conf/pull/5
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
+  workflow_call:
+  inputs:
+    directories:
+      description: "List of directories to check"
+      required: true
+      type: array
+    msrv:
+      description: "Minimum Supported Rust Version"
+      required: true
+      type: string
+  secrets:
+    GITHUB_TOKEN:
+      required: true
+
 name: check
 jobs:
   fmt:
     runs-on: ubuntu-latest
     name: stable / fmt
+    strategy:
+      matrix:
+        directory: ${{ inputs.directories }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -45,6 +54,7 @@ jobs:
       matrix:
         # Get early warning of new lints which are regularly introduced in beta channels.
         toolchain: [stable, beta]
+        directory: ${{ inputs.directories }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -62,6 +72,9 @@ jobs:
   semver:
     runs-on: ubuntu-latest
     name: semver
+    strategy:
+      matrix:
+        directory: ${{ inputs.directories }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -78,6 +91,9 @@ jobs:
     # API be documented as only available in some specific platforms.
     runs-on: ubuntu-latest
     name: nightly / doc
+    strategy:
+      matrix:
+        directory: ${{ inputs.directories }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -112,15 +128,15 @@ jobs:
     # https://docs.github.com/en/actions/learn-github-actions/contexts#context-availability
     strategy:
       matrix:
-        msrv: ["1.56.1"] # 2021 edition requires 1.56
-    name: ubuntu / ${{ matrix.msrv }}
+        directory: ${{ inputs.directories }}
+    name: ubuntu / ${{ inputs.msrv }}
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: true
-      - name: Install ${{ matrix.msrv }}
+      - name: Install ${{ inputs.msrv }}
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: ${{ matrix.msrv }}
-      - name: cargo +${{ matrix.msrv }} check
+          toolchain: ${{ inputs.msrv }}
+      - name: cargo +${{ inputs.msrv }} check
         run: cargo check

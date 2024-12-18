@@ -3,21 +3,26 @@
 # information about how the concurrency cancellation and workflow triggering works
 permissions:
   contents: read
+
+# This all is a workaround for the [lack of YAML anchors in Github Actions](https://github.com/actions/runner/issues/1182).
+# Once those are added, this file can be merged with /check_config.yml
 on:
-  push:
-    branches: [main]
-  pull_request:
-  schedule:
-    - cron: "7 7 * * 1"
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
+  workflow_call:
+  inputs:
+    directories:
+      description: "List of directories to check"
+      required: true
+      type: array
+
 name: rolling
 jobs:
   # https://twitter.com/mycoliza/status/1571295690063753218
   nightly:
     runs-on: ubuntu-latest
     name: ubuntu / nightly
+    strategy:
+      matrix:
+        directory: ${{ inputs.directories }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -38,6 +43,9 @@ jobs:
     # to).
     runs-on: ubuntu-latest
     name: ubuntu / beta / updated
+    strategy:
+      matrix:
+        directory: ${{ inputs.directories }}
     # There's no point running this if no Cargo.lock was checked in in the first place, since we'd
     # just redo what happened in the regular test job. Unfortunately, hashFiles only works in if on
     # steps, so we repeat it.
