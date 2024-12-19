@@ -34,3 +34,57 @@ Removed features:
   - leak sanitizer - detects memory leaks
   - loom - Permutation testing for concurrent code [Crates.io: Loom](https://crates.io/crates/loom)
 - Nostd
+
+## Testing locally
+
+These workflows were tested using [`nektos/act`](https://nektosact.com/)
+This can be done as follows
+
+```sh
+act -l    # List the jobs
+act       # Run all (warning a lot of output)
+act -j <JOB> -b INPUT_DIRECTORY="<DIR>"    # Run a job from scheduled
+act -j <JOB> --env INPUT_DIRECTORY="<DIR>" --env INPUT_MSRV="1.56.1"    # Run a job from check
+```
+
+TODO: check if it should always by a relative path
+An example of `<DIR>` would be: "./operators/kube-rs-building-cronjob"
+
+> [!NOTE]
+> `-b` does the same as `--env` but doesn't allow multiple
+
+Act can generate a lot of output when using it without filtering.
+It will however produce the most realistic results.
+We advice that in case you want to use it this way, that you pipe the output to a file and grep fro specific jobs like:
+
+```sh
+act | tee act.log
+grep -F "[use-reusable-2/check/stable / fmt" act.log
+```
+
+### Current overview of succesful runs
+
+This code is still in active development.
+Below is an overview of the `act` output:
+
+| Job                                                 | Success | Reason for failure |
+|-----------------------------------------------------|---------|--------------------|
+| use-reusable-{1,2}/rolling/ubuntu / nightly         |   ✅    |                    |
+| use-reusable-{1,2}/rolling/ubuntu / beta / updated  |   ✅    |                    |
+| use-reusable-{1,2}/check/stable / fmt               |   ✅    |                    |
+| use-reusable-{1,2}/check/stable / clippy-1          |   ❌    | environment variable $REVIEWDOG_GITHUB_API_TOKEN is not set + probably wrong directory |
+| use-reusable-{1,2}/check/beta / clippy-2            |   ❌    | environment variable $REVIEWDOG_GITHUB_API_TOKEN is not set + probably wrong directory |
+| use-reusable-{1,2}/check/semver                     |   ❌    | error: couldn't find Cargo.toml in directory PATH/masters-robbe-haegeman |
+| use-reusable-{1,2}/check/nightly / doc              |   ✅    |                    |
+| use-reusable-{1,2}/check/ubuntu / stable / features |   ✅    |                    |
+| use-reusable-1/check/ubuntu / 1.56.1                |   ❌    | failed to get `cron` as a dependency of package `kube-rs-building-cronjob v0.1.0 ... Caused by: SSL error: unknown error; class=Ssl (16) |
+| use-reusable-2/check/ubuntu / 1.56.1                |   ❌    | failed to get `chrono` as a dependency of package `kube-rs-building-cronjob v0.1.0 ... Caused by: SSL error: unknown error; class=Ssl (16) |
+
+> ![NOTE]
+> The {1,2} value was added in post, since most jobs failed / succeeded in the same way in both dirs
+
+In short the issues are:
+
+- not setting the GITHUB_TOKEN
+- not setting the directory for the external actions
+- 1.56.1 isn't the minimal rust version of this crate

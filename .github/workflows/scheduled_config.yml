@@ -23,8 +23,11 @@ concurrency:
 
 jobs:
   use-reusable:
+    strategy:
+      matrix:
+        directory:
+          - operators/kube-rs-building-cronjob
+          - operators/poc-secondary-resource-management
     uses: ./.github/workflows/scheduled.yml
     with:
-      directories: |
-        operators/kube-rs-building-cronjob/**
-        operators/poc-secondary-resource-management/**
+      directory: ${{ matrix.directory }}

@@ -24,11 +24,14 @@ concurrency:
   cancel-in-progress: true
 jobs:
   use-reusable:
+    strategy:
+      matrix:
+        directory:
+          - operators/kube-rs-building-cronjob
+          - operators/poc-secondary-resource-management
     uses: ./.github/workflows/check.yml
     with:
-      directories: |
-        operators/kube-rs-building-cronjob/**
-        operators/poc-secondary-resource-management/**
+      directory: ${{ matrix.directory }}
       msrv: "1.56.1"
     secrets:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

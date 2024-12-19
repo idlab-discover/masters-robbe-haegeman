@@ -13,8 +13,8 @@ permissions:
 on:
   workflow_call:
     inputs:
-      directories:
-        description: "List of directories to check"
+      directory:
+        description: "Directory to check"
         required: true
         type: string
       msrv:
@@ -25,14 +25,20 @@ on:
       GITHUB_TOKEN:
         required: true
 
+# Set the working directory for all steps in this workflow to the callers input
+# This however is not possible due to `defaults.run.working-directory` accepting only static values.
+# defaults:
+#   run:
+#     working-directory: ${{ inputs.directory }}
+
 name: check
 jobs:
   fmt:
     runs-on: ubuntu-latest
     name: stable / fmt
-    strategy:
-      matrix:
-        directory: ${{ inputs.directories }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.directory }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -46,6 +52,9 @@ jobs:
   clippy:
     runs-on: ubuntu-latest
     name: ${{ matrix.toolchain }} / clippy
+    defaults:
+      run:
+        working-directory: ${{ inputs.directory }}
     permissions:
       contents: read
       checks: write
@@ -54,7 +63,6 @@ jobs:
       matrix:
         # Get early warning of new lints which are regularly introduced in beta channels.
         toolchain: [stable, beta]
-        directory: ${{ inputs.directories }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -72,9 +80,9 @@ jobs:
   semver:
     runs-on: ubuntu-latest
     name: semver
-    strategy:
-      matrix:
-        directory: ${{ inputs.directories }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.directory }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -91,9 +99,9 @@ jobs:
     # API be documented as only available in some specific platforms.
     runs-on: ubuntu-latest
     name: nightly / doc
-    strategy:
-      matrix:
-        directory: ${{ inputs.directories }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.directory }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -109,6 +117,9 @@ jobs:
     # which is required for feature unification
     runs-on: ubuntu-latest
     name: ubuntu / stable / features
+    defaults:
+      run:
+        working-directory: ${{ inputs.directory }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -124,12 +135,10 @@ jobs:
   msrv:
     # check that we can build using the minimal rust version that is specified by this crate
     runs-on: ubuntu-latest
-    # we use a matrix here just because env can't be used in job names
-    # https://docs.github.com/en/actions/learn-github-actions/contexts#context-availability
-    strategy:
-      matrix:
-        directory: ${{ inputs.directories }}
     name: ubuntu / ${{ inputs.msrv }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.directory }}
     steps:
       - uses: actions/checkout@v4
         with:
