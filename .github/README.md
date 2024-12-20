@@ -77,8 +77,7 @@ Below is an overview of the `act` output:
 | use-reusable-{1,2}/check/semver                     |   ❌    | error: couldn't find Cargo.toml in directory PATH/masters-robbe-haegeman |
 | use-reusable-{1,2}/check/nightly / doc              |   ✅    |                    |
 | use-reusable-{1,2}/check/ubuntu / stable / features |   ✅    |                    |
-| use-reusable-1/check/ubuntu / 1.56.1                |   ❌    | failed to get `cron` as a dependency of package `kube-rs-building-cronjob v0.1.0 ... Caused by: SSL error: unknown error; class=Ssl (16) |
-| use-reusable-2/check/ubuntu / 1.56.1                |   ❌    | failed to get `chrono` as a dependency of package `kube-rs-building-cronjob v0.1.0 ... Caused by: SSL error: unknown error; class=Ssl (16) |
+| use-reusable-{1,2}/check/ubuntu / 1.77.2            |   ✅    |                    |
 
 > ![NOTE]
 > The {1,2} value was added in post, since most jobs failed / succeeded in the same way in both dirs
@@ -87,4 +86,3 @@ In short the issues are:
 
 - not setting the GITHUB_TOKEN
 - not setting the directory for the external actions
-- 1.56.1 isn't the minimal rust version of this crate
