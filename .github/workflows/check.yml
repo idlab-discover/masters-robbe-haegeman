@@ -21,9 +21,6 @@ on:
         description: "Minimum Supported Rust Version"
         required: true
         type: string
-    secrets:
-      GITHUB_TOKEN:
-        required: true
 
 # Set the working directory for all steps in this workflow to the callers input
 # This however is not possible due to `defaults.run.working-directory` accepting only static values.
@@ -79,6 +76,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           workdir: ${{ inputs.directory }} # https://github.com/giraffate/clippy-action?tab=readme-ov-file#workdir
   # Only required if released on crates.io
+  # It is entirely possible to use this action without publishing, but this requires flags to be set https://github.com/obi1kenobi/cargo-semver-checks#does-the-crate-im-checking-have-to-be-published-on-cratesio
   # semver:
   #   runs-on: ubuntu-latest
   #   name: semver
