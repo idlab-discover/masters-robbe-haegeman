@@ -34,6 +34,8 @@ Removed features:
   - leak sanitizer - detects memory leaks
   - loom - Permutation testing for concurrent code [Crates.io: Loom](https://crates.io/crates/loom)
 - Nostd
+- checks
+  - semver - lint your crate API changes for semver violations (will be added if released to crates.io)
 
 ## Testing locally
 
@@ -74,12 +76,11 @@ Below is an overview of the `act` output:
 | use-reusable-{1,2}/check/stable / fmt               |   ✅    |                    |
 | use-reusable-{1,2}/check/stable / clippy-1          |   ❌    | environment variable $REVIEWDOG_GITHUB_API_TOKEN is not set + probably wrong directory |
 | use-reusable-{1,2}/check/beta / clippy-2            |   ❌    | environment variable $REVIEWDOG_GITHUB_API_TOKEN is not set + probably wrong directory |
-| use-reusable-{1,2}/check/semver                     |   ❌    | error: couldn't find Cargo.toml in directory PATH/masters-robbe-haegeman |
 | use-reusable-{1,2}/check/nightly / doc              |   ✅    |                    |
 | use-reusable-{1,2}/check/ubuntu / stable / features |   ✅    |                    |
 | use-reusable-{1,2}/check/ubuntu / 1.77.2            |   ✅    |                    |
 
-> ![NOTE]
+> [!NOTE]
 > The {1,2} value was added in post, since most jobs failed / succeeded in the same way in both dirs
 
 In short the issues are:
