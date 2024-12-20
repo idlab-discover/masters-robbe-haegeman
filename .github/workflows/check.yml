@@ -22,9 +22,7 @@ on:
         description: "Minimum Supported Rust Version"
         required: true
         type: string
-    secrets:
-      GITHUB_TOKEN:
-        required: true
+    secrets: inherit
 
 # Set the working directory for all steps in this workflow to the callers input
 # This however is not possible due to `defaults.run.working-directory` accepting only static values.
