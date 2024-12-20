@@ -78,24 +78,25 @@ jobs:
           reporter: "github-pr-check"
           github_token: ${{ secrets.GITHUB_TOKEN }}
           workdir: ${{ inputs.directory }} # https://github.com/giraffate/clippy-action?tab=readme-ov-file#workdir
-  semver:
-    runs-on: ubuntu-latest
-    name: semver
-    defaults:
-      run:
-        working-directory: ${{ inputs.directory }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-      - name: Install stable
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt
-      - name: cargo-semver-checks
-        uses: obi1kenobi/cargo-semver-checks-action@v2
-        with:
-          manifest-path: ${{ inputs.directory }}/Cargo.toml # https://github.com/obi1kenobi/cargo-semver-checks-action?tab=readme-ov-file#use-outside-root-directory-of-a-crate-or-a-workspace
+  # Only required if released on crates.io
+  # semver:
+  #   runs-on: ubuntu-latest
+  #   name: semver
+  #   defaults:
+  #     run:
+  #       working-directory: ${{ inputs.directory }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         submodules: true
+  #     - name: Install stable
+  #       uses: dtolnay/rust-toolchain@stable
+  #       with:
+  #         components: rustfmt
+  #     - name: cargo-semver-checks
+  #       uses: obi1kenobi/cargo-semver-checks-action@v2
+  #       with:
+  #         manifest-path: ${{ inputs.directory }}/Cargo.toml # https://github.com/obi1kenobi/cargo-semver-checks-action?tab=readme-ov-file#use-outside-root-directory-of-a-crate-or-a-workspace
   doc:
     # run docs generation on nightly rather than stable. This enables features like
     # https://doc.rust-lang.org/beta/unstable-book/language-features/doc-cfg.html which allows an
