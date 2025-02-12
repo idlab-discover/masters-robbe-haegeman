@@ -24,12 +24,25 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 jobs:
+  # JOB to run change detection (see https://github.com/dorny/paths-filter?tab=readme-ov-file#conditional-execution)
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      directories: ${{ steps.filter.outputs.changes }}
+    steps:
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            operators/kube-rs-building-cronjob: operators/kube-rs-building-cronjob
+            operators/poc-secondary-resource-management: operators/poc-secondary-resource-management
   use-check:
+    needs: changes
     strategy:
       matrix:
-        directory:
-          - operators/kube-rs-building-cronjob
-          - operators/poc-secondary-resource-management
+        directory: ${{ fromJSON(needs.changes.outputs.directories) }}
     uses: ./.github/workflows/check.yml
     with:
       directory: ${{ matrix.directory }}
