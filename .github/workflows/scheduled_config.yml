@@ -28,6 +28,6 @@ jobs:
         directory:
           - operators/kube-rs-building-cronjob
           - operators/poc-secondary-resource-management
-    uses: ./.github/workflows/reusable/scheduled.yml
+    uses: ./.github/workflows/scheduled.yml
     with:
       directory: ${{ matrix.directory }}
