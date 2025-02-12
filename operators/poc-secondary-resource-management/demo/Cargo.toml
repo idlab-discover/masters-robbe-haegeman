@@ -13,10 +13,6 @@ doc = false
 name = "crdgen"
 path = "src/crdgen.rs"
 
-[lib]
-name = "controller"
-path = "src/lib.rs"
-
 [dependencies]
 kube = { version = "0.97.0", features = ["runtime", "derive", "client"] }
 k8s-openapi = { version = "0.23.0", features = ["v1_31", "schemars"] }

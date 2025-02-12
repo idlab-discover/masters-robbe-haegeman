@@ -1,10 +1,13 @@
+mod controller;
+pub mod crd;
+pub mod error;
+mod reconcile_sec_res;
+
 use controller::Context;
 use kube::Error;
 use std::sync::Arc;
 
 use kube::Client;
-
-pub use controller::{self, crd};
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
