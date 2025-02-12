@@ -43,7 +43,7 @@ jobs:
     strategy:
       matrix:
         directory: ${{ fromJSON(needs.changes.outputs.directories) }}
-    uses: ./.github/workflows/check.yml
+    uses: ./.github/workflows/reusable/check.yml
     with:
       directory: ${{ matrix.directory }}
       msrv: "1.77.2"
