@@ -22,7 +22,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  use-reusable:
+  use-scheduled:
     strategy:
       matrix:
         directory:
