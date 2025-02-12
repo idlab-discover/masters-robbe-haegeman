@@ -15,10 +15,11 @@ use kube::{
 };
 
 use crate::{
-    crd::{self, PrimaryResource},
-    error::Result,
+    crd::{self},
     Context,
 };
+
+use lib::{error::Result, PrimaryResource};
 
 // Placeholder for the real struct
 pub struct ReplsetSpec {

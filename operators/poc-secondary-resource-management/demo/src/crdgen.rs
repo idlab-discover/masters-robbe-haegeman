@@ -1,5 +1,4 @@
 pub mod crd;
-pub mod error;
 
 use kube::CustomResourceExt;
 use std::fs::File;

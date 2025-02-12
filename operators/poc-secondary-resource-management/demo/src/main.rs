@@ -1,6 +1,5 @@
 mod controller;
 pub mod crd;
-pub mod error;
 mod reconcile_sec_res;
 
 use controller::Context;

@@ -1,12 +1,9 @@
-use crate::error::{Error, Result};
-use kube::{
-    api::{ApiResource, DynamicObject, PostParams},
-    core::object::HasStatus,
-    Api, Client, ResourceExt,
-};
+use kube::{api::DynamicObject, core::object::HasStatus, ResourceExt};
 use kube_derive::CustomResource;
+use lib::error::{Error, Result};
+use lib::PrimaryResource;
 use schemars::JsonSchema;
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 
 #[derive(CustomResource, Debug, Serialize, Deserialize, Default, Clone, JsonSchema)]
@@ -49,48 +46,5 @@ impl PrimaryResource for Database {
             return Ok(&mut status.sec_recs);
         }
         Err(Error::MissingStatusError(name))
-    }
-}
-
-pub(crate) trait PrimaryResource: kube::ResourceExt {
-    fn initialize_status(&mut self);
-    fn secondary_resources(&self) -> Result<&Vec<DynamicObject>>;
-    fn secondary_resources_mut(&mut self) -> Result<&mut Vec<DynamicObject>>;
-
-    async fn create_secondary<
-        K: kube::Resource<Scope = k8s_openapi::NamespaceResourceScope>
-            + Clone
-            + Debug
-            + Serialize
-            + DeserializeOwned,
-    >(
-        &mut self,
-        client: Client,
-        pp: &mut PostParams,
-        data: &K,
-    ) -> Result<K>
-    where
-        <K as kube::Resource>::DynamicType: std::default::Default,
-    {
-        let secondary_api: Api<K> =
-            Api::namespaced(client, &self.namespace().unwrap_or(String::from("default")));
-
-        let res = secondary_api
-            .create(pp, data)
-            .await
-            .map_err(Error::KubeError)?;
-
-        self.secondary_resources_mut()?.push(DynamicObject::new(
-            &res.name_any(),
-            &ApiResource::erase::<K>(&K::DynamicType::default()),
-        ));
-
-        log::info!(
-            "{}: Current secondary resources vec: {:?}",
-            self.name_any(),
-            self.secondary_resources().unwrap_or(&Vec::new())
-        );
-
-        Ok(res)
     }
 }
