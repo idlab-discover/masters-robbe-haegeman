@@ -363,6 +363,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "demo"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "env_logger",
+ "futures",
+ "k8s-openapi",
+ "kube",
+ "kube-derive",
+ "log",
+ "schemars",
+ "serde",
+ "serde_json",
+ "serde_yaml",
+ "thiserror 2.0.5",
+ "tokio",
+]
+
+[[package]]
 name = "digest"
 version = "0.10.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1232,25 +1251,6 @@ name = "pin-utils"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
-
-[[package]]
-name = "poc-secondary-resource-management"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "env_logger",
- "futures",
- "k8s-openapi",
- "kube",
- "kube-derive",
- "log",
- "schemars",
- "serde",
- "serde_json",
- "serde_yaml",
- "thiserror 2.0.5",
- "tokio",
-]
 
 [[package]]
 name = "ppv-lite86"
