@@ -2,7 +2,7 @@ pub mod error;
 
 use crate::error::{Error, Result};
 use kube::{
-    api::{ApiResource, DynamicObject, PostParams},
+    api::{ApiResource, DeleteParams, DynamicObject, ListParams, Patch, PatchParams, PostParams},
     Api, Client, ResourceExt,
 };
 use serde::{de::DeserializeOwned, Serialize};
@@ -12,6 +12,13 @@ pub trait PrimaryResource: kube::ResourceExt {
     fn initialize_status(&mut self);
     fn secondary_resources(&self) -> Result<&Vec<DynamicObject>>;
     fn secondary_resources_mut(&mut self) -> Result<&mut Vec<DynamicObject>>;
+
+    // https://fasterthanli.me/articles/catching-up-with-async-rust
+    // https://smallcultfollowing.com/babysteps/blog/2019/10/26/async-fn-in-traits-are-hard/
+    // Could be that we will have to transition to the async_trait crate down the line, but would introduce Send restriction
+    async fn get_secondary(&self, _name: &str) {}
+
+    async fn list_secondary(&self, _lp: &ListParams) {}
 
     async fn create_secondary<
         K: kube::Resource<Scope = k8s_openapi::NamespaceResourceScope>
@@ -48,5 +55,15 @@ pub trait PrimaryResource: kube::ResourceExt {
         );
 
         Ok(res)
+    }
+
+    async fn delete_secondary(&mut self, _name: &str, _dp: &DeleteParams) {}
+
+    async fn patch_secondary<P: Serialize + Debug>(
+        &self,
+        _name: &str,
+        _pp: &PatchParams,
+        _patch: &Patch<P>,
+    ) {
     }
 }
