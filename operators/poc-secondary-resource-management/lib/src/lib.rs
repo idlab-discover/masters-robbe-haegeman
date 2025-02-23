@@ -1,11 +1,13 @@
 pub mod error;
 
 use crate::error::{Error, Result};
+use k8s_openapi::api::core;
 use kube::{
+    Api, Client, Resource, ResourceExt,
     api::{ApiResource, DeleteParams, DynamicObject, ListParams, Patch, PatchParams, PostParams},
-    Api, Client, ResourceExt,
+    runtime::{Controller, watcher},
 };
-use serde::{de::DeserializeOwned, Serialize};
+use serde::{Serialize, de::DeserializeOwned};
 use std::fmt::Debug;
 
 pub trait PrimaryResource: kube::ResourceExt {
@@ -36,8 +38,13 @@ pub trait PrimaryResource: kube::ResourceExt {
         <Self as kube::Resource>::DynamicType: std::default::Default,
         <K as kube::Resource>::DynamicType: std::default::Default,
     {
-        let owner_ref = self.controller_owner_ref(&Self::DynamicType::default()).expect("Assured by docs that unwrapping is safe");
-        data.meta_mut().owner_references.get_or_insert(Vec::new()).push(owner_ref);
+        let owner_ref = self
+            .controller_owner_ref(&Self::DynamicType::default())
+            .expect("Assured by docs that unwrapping is safe");
+        data.meta_mut()
+            .owner_references
+            .get_or_insert(Vec::new())
+            .push(owner_ref);
 
         let secondary_api: Api<K> =
             Api::namespaced(client, &self.namespace().unwrap_or(String::from("default")));
@@ -69,5 +76,22 @@ pub trait PrimaryResource: kube::ResourceExt {
         _pp: &PatchParams,
         _patch: &Patch<P>,
     ) {
+    }
+
+    // Where clause was directly taken from [owns](https://docs.rs/kube/latest/kube/runtime/struct.Controller.html#method.owns) apart from Sync, which was required by the compiler
+    fn setup_watches(
+        controller: Controller<Self>,
+        client: Client,
+        ns: Option<&str>,
+    ) -> Controller<Self>
+    where
+        Self: Clone + Resource<DynamicType = ()> + DeserializeOwned + Debug + Send + Sync + 'static,
+    {
+        let secret_api: Api<core::v1::Secret> = if let Some(ns) = ns {
+            Api::namespaced(client.clone(), ns)
+        } else {
+            Api::all(client.clone())
+        };
+        controller.owns(secret_api, watcher::Config::default())
     }
 }

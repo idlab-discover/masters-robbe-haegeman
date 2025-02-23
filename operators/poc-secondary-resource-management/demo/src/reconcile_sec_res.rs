@@ -5,21 +5,21 @@
 use std::{collections::BTreeMap, sync::Arc};
 
 use k8s_openapi::{
-    api::{apps, core},
     ByteString,
+    api::{apps, core},
 };
 use kube::{
+    Api, ResourceExt,
     api::{ObjectMeta, Patch, PatchParams, PostParams},
     core::object::HasSpec,
-    Api, ResourceExt,
 };
 
 use crate::{
-    crd::{self},
     Context,
+    crd::{self},
 };
 
-use lib::{error::Result, PrimaryResource};
+use lib::{PrimaryResource, error::Result};
 
 // Placeholder for the real struct
 pub struct ReplsetSpec {
