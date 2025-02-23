@@ -154,7 +154,7 @@ pub async fn reconcile_user_secret(db: &mut crd::Database, ctx: Arc<Context>) ->
             .await?;
     } else {
         // Create secret if not yet present
-        let secret = core::v1::Secret {
+        let mut secret = core::v1::Secret {
             metadata: ObjectMeta {
                 name: Some(String::from(secret_name)), // Secret name
                 namespace: Some(db.namespace().unwrap_or(String::from("default"))), // Namespace
@@ -171,7 +171,7 @@ pub async fn reconcile_user_secret(db: &mut crd::Database, ctx: Arc<Context>) ->
         db.initialize_status();
 
         // secret_api.create(&PostParams::default(), &secret).await?;
-        db.create_secondary(client.clone(), &mut PostParams::default(), &secret)
+        db.create_secondary(client.clone(), &mut PostParams::default(), &mut secret)
             .await?;
     }
 

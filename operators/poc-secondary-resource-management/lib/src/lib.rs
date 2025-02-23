@@ -30,11 +30,15 @@ pub trait PrimaryResource: kube::ResourceExt {
         &mut self,
         client: Client,
         pp: &mut PostParams,
-        data: &K,
+        data: &mut K,
     ) -> Result<K>
     where
+        <Self as kube::Resource>::DynamicType: std::default::Default,
         <K as kube::Resource>::DynamicType: std::default::Default,
     {
+        let owner_ref = self.controller_owner_ref(&Self::DynamicType::default()).expect("Assured by docs that unwrapping is safe");
+        data.meta_mut().owner_references.get_or_insert(Vec::new()).push(owner_ref);
+
         let secondary_api: Api<K> =
             Api::namespaced(client, &self.namespace().unwrap_or(String::from("default")));
 
