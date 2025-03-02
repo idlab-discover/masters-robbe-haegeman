@@ -921,7 +921,7 @@ dependencies = [
  "k8s-openapi",
  "kube-client",
  "kube-core",
- "kube-derive",
+ "kube-derive 0.97.0",
  "kube-runtime",
 ]
 
@@ -995,6 +995,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "kube-derive"
+version = "0.98.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "37745d8a4076b77e0b1952e94e358726866c8e14ec94baaca677d47dcdb98658"
+dependencies = [
+ "darling",
+ "proc-macro2",
+ "quote",
+ "serde_json",
+ "syn",
+]
+
+[[package]]
 name = "kube-rs-building-cronjob"
 version = "0.1.0"
 dependencies = [
@@ -1003,7 +1016,7 @@ dependencies = [
  "futures",
  "k8s-openapi",
  "kube",
- "kube-derive",
+ "kube-derive 0.98.0",
  "log",
  "schemars",
  "serde",
