@@ -40,7 +40,6 @@ jobs:
             operators/poc-secondary-resource-management: operators/poc-secondary-resource-management
   use-check:
     needs: changes
-    if: ${{ always() && (needs.changes.outputs.directories != '' || needs.changes.outputs.directories != '[]') }}
     strategy:
       matrix:
         directory: ${{ fromJSON(needs.changes.outputs.directories) }}
