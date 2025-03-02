@@ -1,4 +1,5 @@
 # Building Cronjob - Kubebuilder
+
 When attempting to learn Kube.rs, I found that the tutorials were often quite lacking when compared to Kubebuilder.
 This is quite logical, since Kubebuilder is both more mature and more widely used.
 It however also sparked the idea to follow a Kubebuilder tutorial ([Kubebuilder book: Building Cronjob](https://book.kubebuilder.io/cronjob-tutorial/cronjob-tutorial)) using Kube.rs.
@@ -12,24 +13,30 @@ It is however a lot easier to compare the Kube.rs and Kubebuilder solutions if t
 ## Commands used in the tutorial
 
 ### 1. Tutorial: Building Cronjob
+
 ```sh
 kubebuilder init --domain tutorial.kubebuilder.io --repo tutorial.kubebuilder.io/project
 ```
-###  1.4 Adding a new API
+
+### 1.4 Adding a new API
+
 ```sh
 kubebuilder create api --group batch --version v1 --kind CronJob
 ```
 
-###  1.8 Implementing defaulting/validating webhooks
+### 1.8 Implementing defaulting/validating webhooks
+
 ```sh
 kubebuilder create webhook --group batch --version v1 --kind CronJob --defaulting --programmatic-validation
 ```
 
 ### 1.9 Running and deploying the controller
+
 ```sh
 make manifests
 make install
 ```
+
 ```sh
 kubectl create -f config/samples/batch_v1_cronjob.yaml
 kubectl get cronjob.batch.tutorial.kubebuilder.io -o yaml

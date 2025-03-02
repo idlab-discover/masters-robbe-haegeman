@@ -1,11 +1,13 @@
 # Notes - Investigation Architecture Operators
 
 ## Environment
+
 - Linux (KDE Neon 24.04)
 - Minikube (.deb) v1.34.0 (commit: 210b148df93a80eb872ecbeb7e35281b3c582c61x)
 - Kubectl (snap) (Client: v1.31.1, Kustomize: v5.4.2, Server: v1.31.0)
 
 ## Investigated Operators
+
 The operators below were taken from the thesis of Van Landuyt.
 
 ### Overview

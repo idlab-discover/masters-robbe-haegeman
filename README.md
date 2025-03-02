@@ -1,11 +1,16 @@
 # Master thesis project - Edge Kubernetes with WebAssembly
-<img src="./thesis_resources/meeting_notes/attachments/mascot.png" width="200" />
+
+<div align="center">
+   <img alt="project mascot: Ferris the crab holding the Kubernetes logo with a WASM backpack" src="./thesis_resources/meeting_notes/attachments/mascot.png" width="200" />
+</div>
 
 ## Overview
+
 This repository contains resources for my master's thesis focused on optimizing Kubernetes operators for edge orchestration using WebAssembly.  
 Building on the prototype of Ramlot T. and Van Landuyt K., this project aims to find alternative solutions to wake-up behavior in operators, causing inefficiencies within the WebAssembly-based environment.
 
 ## Background
+
 This is the third instalment in a series of master's theses, where Kubernetes is adapted for orchestration at the edge by making use of WebAssembly.  
 It builds on the prior work of Ramlot T. ([Github repo](https://github.com/thesis-2022-wasm-operators/wasm_operator)), who created the prototype, and Van Landuyt K. ([Github repo](https://github.com/kvanla/wasm-operator)), who expanded the prototype with predictive capabilities.
 
@@ -14,6 +19,7 @@ This is problematic for the WASM prototype, since unloading is used to minimize 
 Minimizing the number of wake-ups (i.e. calling the reconcilation function), increases the efficiency of the solution.
 
 ### "Accepted" reasons to use scheduled reconcilation
+
 From [Kubebuilder book: Why not use RequeueAfter X for all scenarios instead of watching resources?](https://book.kubebuilder.io/reference/watching-resources.html?highlight=period#why-not-use-requeueafter-x-for-all-scenarios-instead-of-watching-resources):
 > While RequeueAfter is not the primary method for triggering reconciliations, there are specific cases where it is necessary, such as:
 >
@@ -22,7 +28,9 @@ From [Kubebuilder book: Why not use RequeueAfter X for all scenarios instead of 
 > - **Handling Errors or Delays:** When managing resources that encounter errors or require time to self-heal, RequeueAfter ensures the controller waits for a specified duration before checking the resource’s status again, avoiding constant reconciliation attempts.
 
 ### Source problematic behavior
+
 In [findings/investigation_percona_mongodb_reconcile](./thesis_resources/findings/investigation_percona_mongodb_reconcile.md), the entire research process can be found, but in the end two main possibilities were found:
+
 1. In order to support **sidecar containers**
    - These often have the ability to modify the behavior of an application, while not directly modifying the Kubernetes resources, preventing the Reconcile function from being called
    - This can also be seen under the category of "Observing External Systems"
@@ -30,6 +38,7 @@ In [findings/investigation_percona_mongodb_reconcile](./thesis_resources/finding
    - Doing this properly would involve setting up the correct watches, referencing the CR object and making sure the event filtering (through the use of predicates) is up to snuff
 
 ### Possible solutions
+
 1. Add **CLI command to Kubebuilder** (and or operator-sdk) which creates the base for resource watching
    - Both frameworks normally used for project initialization, not during the project
    - Can't be done at initialization since the secondary resources are often added organically during development
@@ -45,14 +54,14 @@ In [findings/investigation_percona_mongodb_reconcile](./thesis_resources/finding
      - Would go against general Kubernetes behavior, but would still fit in their model of eventual consistency
      - Would have to think about how these objects are then represented (for example, would be handy to have the resources grouped by type or maybe even be able to choose in what format), but this could come from the use of a PoC
 
-
 ## Project structure
+
 ### External resources
+
 - [Overleaf](https://www.overleaf.com/read/hskzbnjtxqfc#332172): the current version of the master thesis corresponding to this project
 - [Github](https://github.com/idlab-discover/wasm-operator): repository of the official WASM operator project
 
 All information is included in this repository. Everything relevant to the prototype will later be upstreamed to the WASM operator project.
-
 
 ### Internal folder structure
 
@@ -68,8 +77,8 @@ All information is included in this repository. Everything relevant to the proto
 > Meeting notes will often contain duplicate information. It is mostly used for tracking purposes.  
 > The discussed topics are filtered and written down more thoroughly in the other parts of the project.
 
-
 ### Planning
+
 | Period | Tasks |
 | ------ | ----- |
 | 27/09 - 07/10 | <ul><li>Go through previous master theses</li><li>Research what operators do when activated</li><li>Investigate how events work on client and server side and why these aren't enough for the WASM-operator</li></ul> |
@@ -81,4 +90,5 @@ All information is included in this repository. Everything relevant to the proto
 | 11/12 - 19/12| <ul><li>Add automatic watches to PoC</li><li>Implement feedback presentation</li><li>Create first draft of thesis</li></ul> |
 
 ## Copyright
+
 This project is released under the Apache License Version 2.0.

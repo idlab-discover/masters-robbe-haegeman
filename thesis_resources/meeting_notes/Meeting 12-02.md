@@ -1,6 +1,9 @@
 # Notes - Meeting 02/12/24
+
 ## Preparation
+
 ### Current progress
+
 - Follow the [Kubebuilder tutorial: Building Cronjob](https://book.kubebuilder.io/cronjob-tutorial/cronjob-tutorial) with kube.rs
   - Due to lack of good guides in the Kube.rs ecosystem
   - Took quite some time: tutorial (and a lot of Go operators) make assumptions on when a value isn't Null
@@ -24,8 +27,8 @@
 - Further research in the need of scheduled reconcilation for the Percona MongoDB operator
   - See [the findings file on the topic](../findings/investigation_percona_mongodb_reconcile.md)
 
-
 ### Subjects to discuss
+
 - Investigation of the scheduled reconcilation
   - End conclusion: the operator currently doesn't watch all resources controlled by the CR
     - It only manages the primary resources, not the secondary resources
@@ -41,16 +44,19 @@
 - When is deadline for the first draft of the thesis?
   - Currently all my write-up is in the repo
 
-
 ## Meeting
+
 ### Building Cronjob using Kube.rs [(with Kubebuilder tutorial)](https://book.kubebuilder.io/cronjob-tutorial/cronjob-tutorial)
+
 Is definitely an interesting part of the process.
 Differences between creating an operator with Kube.rs vs. Kubebuilder (that go further than just syntactic) should be documented and could be incorporated with the thesis
 
 -> Definitely interesting to continue the operator and document the differences
 
 ### Improving the dev experience of the WASM operator prototype
+
 #### Installation process
+
 You can be very opinionated with the execution of the operator.  
 In case something can be improved -> create a PR
 (on that note, you can definitely add the `percona_mongodb_event_creator` to the Github)
@@ -59,6 +65,7 @@ In case something can be improved -> create a PR
 [ShellCheck](https://www.shellcheck.net/) is definitely recommended -> great feedback on keeping code clean and a lot of warnings
 
 **BUT** removing the need for a shell script through a thorough README, would be a better solution
+
   - Content
     - Describing what to install
     - How to setup the parent operator
@@ -71,22 +78,24 @@ In case something can be improved -> create a PR
       -> Makes it easier to expand on the solution  
       -> Removes barrier from entry (what will it install and how can I remove it?)
 
-
 #### Linting errors
+
 Definitely something that should be fixed, since it is low effort.  
 Create a separate commit for this however, so the history stays parsable.  
 Document the dev environment used (in this case, that would be using `clippy` on save)
 
 #### Improving the documentation
+
 Making the application easier to use / setup is definitely important in the project
 Could be part of the reason that there is a lot of interest, but not a lot of people using it / further developing the prototype.
 
-
 ### Investigation of the scheduled reconcilation
+
 Secondary resources seems to be a proper conclusion.
 The sidecar containers are also interesting, but not the main focus here.
 
 Possibilities to solve the problem:
+
 1. Add **CLI command to Kubebuilder** (and or operator-sdk) which creates the base for resource watching
    - Both frameworks normally used for project initialization, not during the project
    - Can't be done at initialization since the secondary resources are often added organically during development
@@ -102,8 +111,8 @@ Possibilities to solve the problem:
      - Would go against general Kubernetes behavior, but would still fit in their model of eventual consistency
      - Would have to think about how these objects are then represented (for example, would be handy to have the resources grouped by type or maybe even be able to choose in what format), but this could come from the use of a PoC
 
-
 ### Creating a PoC
+
 PoC is very dependent on what is possible in the limited timeframe,
 because of that an operator outside the WASM environment is definitely a good option.
 This frees up time, that can be used to further develop the solution
@@ -115,13 +124,14 @@ Both a minimal Rust and minimal Go operator are valid prototypes
 A solution using a separate file (thus client-side) is a good option.
 This would allow for easy development of an interface and could be used to easily display the advantages the solution would have.
 
-
 ### First draft of thesis
+
 Definitely recommended to create a first version.
 Allows the counselors to review the writing, and support more in case that is required.
 
 Not enforced, but having a general idea written down on the structure of the paper (for example a table of contents) and an initial introduction would be a very good result.
 
 ### Cooperation with the other students
+
 A group was created to help eachother with the use of the WASM prototype.
 I plan on trying to create the documentation in order to help the others in using the framework, but most of these things can be done cooperatively.

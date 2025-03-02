@@ -1,8 +1,11 @@
 # Notes - Meeting 11/12/24
 
 ## Preparation
+
 ### Current progress
+
 #### WASM-prototype
+
 - PR: Clean up code using formatters and linters and document which are used
   - <https://github.com/idlab-discover/wasm-operator/pull/5>
 - PR: Document the commands used in the `run_wasm.sh` file
@@ -22,6 +25,7 @@
   - Pre-commit
 
 #### PoC
+
 - Mock-up
   - Functions in Reconcile Percona MongoDB operator
     - Gives realistic environment
@@ -43,10 +47,12 @@
     -> Some could be scheduled reconcile if necessary (could allow for further optimizations such as loading back into memory at the right time)
 
 #### Miscellaneous
+
 - Create a logo (first draft)
   - ![Ferris the crab with a WASM backpack, holding the Kubernetes logo](./attachments/mascot.png)
 
 ### Subjects to discuss
+
 - Feedback prototype
 - Presentation (planning in particular)
 - Current setup PoC
@@ -63,7 +69,9 @@
     - Doesn't seem like "research" important to thesis
 
 ## Meeting
+
 ### Improving the dev experience of the WASM operator prototype
+
 All seem like valid points, most of the discussion was about the merging of the operators:
 
 The minor differences are on how they call the other operators (e.g. ring pattern).
@@ -74,17 +82,20 @@ Difference has to stay clear!
 
 Would allow controller to be more maintainable and a better starting example.
 
-
 ### Feedback presentation
+
 #### Font
+
 Don't use UGent Panno Text -> issues when not installed on the computer
 -> Use secondary font (Arial)
 
 #### Structure
+
 Global structure needs some work.
 The content isn't a story -> jumps from one place to another.
 
 Normal structure:
+
 1. What is the context
 2. What will you do (the goals)
 3. What have you done (the progress)
@@ -92,6 +103,7 @@ Normal structure:
 4. What will be next (planning / the future)
 
 Concrete for my presentation that means
+
 - Add slide on Cloud Native / Kubernetes in Edge Context and how it uses too many resources (broad context) (can be 20 sec or so)
 - Make a clear separation where previous work ends and my progress starts
 - First mention period wake-up, then why that is a problem (expensive)
@@ -110,7 +122,9 @@ Concrete for my presentation that means
   - Progress should just introduce it
 
 #### Planning
+
 Start from the back:
+
 - What has to be done before deadline
   - Stay high level
     1. Extended abstract
@@ -129,7 +143,7 @@ but doesn't include writing chapters on each of these topics of course
 - Include optional goals
   - Can be removed if behind on schedule
 
-
 ### Mascot
+
 The mascot may definitely be used, but the appropriate sources have to be mentioned.
 See [RustiFlow](https://github.com/idlab-discover/RustiFlow) as an example.

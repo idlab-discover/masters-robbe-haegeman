@@ -1,4 +1,5 @@
 # Percona MongoDB operator - Tracing
+
 [Percona docs: architecture](https://docs.percona.com/percona-operator-for-mongodb/architecture.html)
 
 - Linux (KDE Neon 24.04)
@@ -7,9 +8,11 @@
 - Operator version: 1.17
 
 ## Install instructions - Minikube
+
 [Percona docs: Install on Minikube](https://docs.percona.com/percona-operator-for-mongodb/minikube.html)
 
 ### Setup of manifests
+
 ```sh
 # Minimal requirements for the operator are higher than the minikube defaults
 minikube start --memory=5120 --cpus=4 --disk-size=30g
@@ -24,7 +27,9 @@ kubectl apply -f https://raw.githubusercontent.com/percona/percona-server-mongod
 
 > [!TIP]
 `minikube dashboard` is quite helpful during the startup sequence, since this can take some time (including failures).
+
 ### Usage testing
+
 ```sh
 # List the Secrets objects
 kubectl get secrets
@@ -46,7 +51,9 @@ mongosh "mongodb://databaseAdmin:databaseAdminPassword@minimal-cluster-mongos.<n
 ```
 
 ## Adding modifications
+
 ### Location of the reconcilation function
+
 This was not in the position where it resides by default in a Kubebuilder project.
 
 TODO: Look if `operator-sdk` uses another default position or if this is just a Percona customization
@@ -54,8 +61,8 @@ TODO: Look if `operator-sdk` uses another default position or if this is just a 
 It can be found in [pkg/controller/perconaservermongodb/psmdb_controller.go](https://github.com/percona/percona-server-mongodb-operator/blob/82a1d9717b2854b04dd7e0e0778caaf54de68f60/pkg/controller/perconaservermongodb/psmdb_controller.go#L234)
 
 ### Using a customized image for the operator
-[Github: E2E tests](https://github.com/percona/percona-server-mongodb-operator/tree/main/e2e-tests)
 
+[Github: E2E tests](https://github.com/percona/percona-server-mongodb-operator/tree/main/e2e-tests)
 
 The following instructions post the customized operator to Docker Hub. This is due to the build process assuming this. A public image is the easiest, since no management of images within minikube is required.
 
