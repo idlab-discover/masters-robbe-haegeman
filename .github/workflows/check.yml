@@ -1,0 +1,154 @@
+# This workflow runs whenever a PR is opened or updated, or a commit is pushed to main. It runs
+# several checks:
+# - fmt: checks that the code is formatted according to rustfmt
+# - clippy: checks that the code does not contain any clippy warnings
+# - doc: checks that the code can be documented without errors
+# - hack: check combinations of feature flags
+# - msrv: check that the msrv specified in the crate is correct
+permissions:
+  contents: read
+  checks: write # Note: this wasn't in the original workflow, but seems to be required for the clippy action. This should be investigated
+
+# This all is a workaround for the [lack of YAML anchors in Github Actions](https://github.com/actions/runner/issues/1182).
+# Once those are added, this file can be merged with /check_config.yml
+on:
+  workflow_call:
+    inputs:
+      directory:
+        description: "Directory to check"
+        required: true
+        type: string
+      msrv:
+        description: "Minimum Supported Rust Version"
+        required: true
+        type: string
+
+# Set the working directory for all steps in this workflow to the callers input
+# This however is not possible due to `defaults.run.working-directory` accepting only static values.
+# defaults:
+#   run:
+#     working-directory: ${{ inputs.directory }}
+
+name: check
+jobs:
+  fmt:
+    runs-on: ubuntu-latest
+    name: stable / fmt
+    defaults:
+      run:
+        working-directory: ${{ inputs.directory }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Install stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - name: cargo fmt --check
+        run: cargo fmt --check
+  clippy:
+    runs-on: ubuntu-latest
+    name: ${{ matrix.toolchain }} / clippy
+    defaults:
+      run:
+        working-directory: ${{ inputs.directory }}
+    permissions:
+      contents: read
+      checks: write
+    strategy:
+      fail-fast: false
+      matrix:
+        # Get early warning of new lints which are regularly introduced in beta channels.
+        toolchain: [stable, beta]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Install ${{ matrix.toolchain }}
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          components: clippy
+      - name: cargo clippy
+        uses: giraffate/clippy-action@v1
+        with:
+          reporter: "github-pr-check"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workdir: ${{ inputs.directory }} # https://github.com/giraffate/clippy-action?tab=readme-ov-file#workdir
+  # Only required if released on crates.io
+  # It is entirely possible to use this action without publishing, but this requires flags to be set https://github.com/obi1kenobi/cargo-semver-checks#does-the-crate-im-checking-have-to-be-published-on-cratesio
+  # semver:
+  #   runs-on: ubuntu-latest
+  #   name: semver
+  #   defaults:
+  #     run:
+  #       working-directory: ${{ inputs.directory }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         submodules: true
+  #     - name: Install stable
+  #       uses: dtolnay/rust-toolchain@stable
+  #       with:
+  #         components: rustfmt
+  #     - name: cargo-semver-checks
+  #       uses: obi1kenobi/cargo-semver-checks-action@v2
+  #       with:
+  #         manifest-path: ${{ inputs.directory }}/Cargo.toml # https://github.com/obi1kenobi/cargo-semver-checks-action?tab=readme-ov-file#use-outside-root-directory-of-a-crate-or-a-workspace
+  doc:
+    # run docs generation on nightly rather than stable. This enables features like
+    # https://doc.rust-lang.org/beta/unstable-book/language-features/doc-cfg.html which allows an
+    # API be documented as only available in some specific platforms.
+    runs-on: ubuntu-latest
+    name: nightly / doc
+    defaults:
+      run:
+        working-directory: ${{ inputs.directory }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Install nightly
+        uses: dtolnay/rust-toolchain@nightly
+      - name: Install cargo-docs-rs
+        uses: dtolnay/install@cargo-docs-rs
+      - name: cargo docs-rs
+        run: cargo docs-rs
+  hack:
+    # cargo-hack checks combinations of feature flags to ensure that features are all additive
+    # which is required for feature unification
+    runs-on: ubuntu-latest
+    name: ubuntu / stable / features
+    defaults:
+      run:
+        working-directory: ${{ inputs.directory }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Install stable
+        uses: dtolnay/rust-toolchain@stable
+      - name: cargo install cargo-hack
+        uses: taiki-e/install-action@cargo-hack
+      # intentionally no target specifier; see https://github.com/jonhoo/rust-ci-conf/pull/4
+      # --feature-powerset runs for every combination of features
+      - name: cargo hack
+        run: cargo hack --feature-powerset check
+  msrv:
+    # check that we can build using the minimal rust version that is specified by this crate
+    runs-on: ubuntu-latest
+    name: ubuntu / ${{ inputs.msrv }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.directory }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Install ${{ inputs.msrv }}
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ inputs.msrv }}
+      - name: cargo +${{ inputs.msrv }} check
+        run: cargo check

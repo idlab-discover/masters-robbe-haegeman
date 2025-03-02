@@ -1,0 +1,50 @@
+# This all is a workaround for the [lack of YAML anchors in Github Actions](https://github.com/actions/runner/issues/1182).
+# Once those are added, this file can be merged with /check.yml
+name: checks execute
+
+permissions:
+  contents: read
+  checks: write
+# This configuration allows maintainers of this repo to create a branch and pull request based on
+# the new branch. Restricting the push trigger to the main branch ensures that the PR only gets
+# built once.
+on:
+  push:
+    branches: [main]
+    paths:
+      - operators/kube-rs-building-cronjob/**
+      - operators/poc-secondary-resource-management/**
+  pull_request:
+    paths:
+      - operators/kube-rs-building-cronjob/**
+      - operators/poc-secondary-resource-management/**
+# If new code is pushed to a PR branch, then cancel in progress workflows for that PR. Ensures that
+# we don't waste CI time, and returns results quicker https://github.com/jonhoo/rust-ci-conf/pull/5
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+jobs:
+  # JOB to run change detection (see https://github.com/dorny/paths-filter?tab=readme-ov-file#conditional-execution)
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      directories: ${{ steps.filter.outputs.changes }}
+    steps:
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            operators/kube-rs-building-cronjob: operators/kube-rs-building-cronjob
+            operators/poc-secondary-resource-management: operators/poc-secondary-resource-management
+  use-check:
+    needs: changes
+    strategy:
+      matrix:
+        directory: ${{ fromJSON(needs.changes.outputs.directories) }}
+    uses: ./.github/workflows/check.yml
+    with:
+      directory: ${{ matrix.directory }}
+      msrv: "1.77.2"
+    secrets: inherit

@@ -1,0 +1,33 @@
+# This all is a workaround for the [lack of YAML anchors in Github Actions](https://github.com/actions/runner/issues/1182).
+# Once those are added, this file can be merged with /schedule.yml
+name: scheduled execute
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - operators/kube-rs-building-cronjob/**
+      - operators/poc-secondary-resource-management/**
+  pull_request:
+    paths:
+      - operators/kube-rs-building-cronjob/**
+      - operators/poc-secondary-resource-management/**
+  schedule:
+    - cron: "7 7 * * 1"
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  use-scheduled:
+    strategy:
+      matrix:
+        directory:
+          - operators/kube-rs-building-cronjob
+          - operators/poc-secondary-resource-management
+    uses: ./.github/workflows/scheduled.yml
+    with:
+      directory: ${{ matrix.directory }}
