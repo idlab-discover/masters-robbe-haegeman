@@ -1,4 +1,4 @@
-# Notes-  Investigation scheduled reconcilation in other operators from OperatorHub
+# Notes - Investigation scheduled reconcilation in other operators from OperatorHub
 
 ## Grafana operator
 

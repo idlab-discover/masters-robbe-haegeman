@@ -1,7 +1,7 @@
 # Master thesis project - Edge Kubernetes with WebAssembly
 
 <div align="center">
-   <img alt="project mascot: Ferris the crab holding the Kubernetes logo with a WASM backpack" src="./thesis_resources/meeting_notes/attachments/mascot.png" width="200" />
+   <img alt="project mascot: Ferris the crab holding the Kubernetes logo with a WASM backpack" src="./thesis_resources/meeting_notes/attachments/mascot.png" width="500" />
 </div>
 
 ## Overview
@@ -29,7 +29,7 @@ From [Kubebuilder book: Why not use RequeueAfter X for all scenarios instead of 
 
 ### Source problematic behavior
 
-In [findings/investigation_percona_mongodb_reconcile](./thesis_resources/findings/investigation_percona_mongodb_reconcile.md), the entire research process can be found, but in the end two main possibilities were found:
+In [findings/investigation_reconcile_percona_mongodb](./thesis_resources/findings/investigation_reconcile_percona_mongodb.md), the entire research process can be found, but in the end two main possibilities were found:
 
 1. In order to support **sidecar containers**
    - These often have the ability to modify the behavior of an application, while not directly modifying the Kubernetes resources, preventing the Reconcile function from being called
@@ -66,11 +66,15 @@ All information is included in this repository. Everything relevant to the proto
 ### Internal folder structure
 
 ```text
-+-- 📂thesis_resources                  # Resources and documentation specific to the thesis project.
-|   +-- 📂findings                      # Detailed research findings and analyses from the project.
-|   +-- 📂meeting_notes                 # Summaries from bi-weekly thesis meetings.
-|   +-- 📂reconcile_testing_operators   # Modified Kubernetes operators exhibiting undesired reconciliation behavior, with added tracing code and setup.
-|   +-- sources.md                      # Table containing overview of most of the used sources.
++-- 📂operators                                     # Kubernetes operators created during learning.
+|   +-- 📂kube-rs-building-cronjob                  # Naive translation of Kubebuilder tutorial to Kube.rs.
+|   +-- 📂kubebuilder-building-cronjob              # Kubebuilder tutorial: "Building cronjob".
++-- 📂poc-secondary-resource-management             # Proof-of-concept: both library and testing grounds.
++-- 📂thesis_resources                              # Resources and documentation specific to the thesis project.
+|   +-- 📂findings                                  # Detailed research findings and analyses from the project.
+|   +-- 📂meeting_notes                             # Summaries from bi-weekly thesis meetings.
+|   +-- 📂investigation_reconcile_percona_mongodb   # Resources used in investigation scheduled reconciliation MongoDB operator
+|   +-- sources.md                                  # Table containing overview of most of the used sources.
 ```
 
 > [!NOTE]

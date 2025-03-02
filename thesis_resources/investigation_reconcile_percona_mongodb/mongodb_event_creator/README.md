@@ -1,4 +1,4 @@
-# Event creator for Percona MongoDB operator
+# Event creator for MongoDB
 
 Based on [mongodbSpammer](https://github.com/idlab-discover/wasm-operator/tree/main/controllers/mongodbSpammer)
 

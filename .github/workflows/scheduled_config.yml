@@ -10,11 +10,11 @@ on:
     branches: [main]
     paths:
       - operators/kube-rs-building-cronjob/**
-      - operators/poc-secondary-resource-management/**
+      - poc-secondary-resource-management/**
   pull_request:
     paths:
       - operators/kube-rs-building-cronjob/**
-      - operators/poc-secondary-resource-management/**
+      - poc-secondary-resource-management/**
   schedule:
     - cron: "7 7 * * 1"
 concurrency:
@@ -27,7 +27,7 @@ jobs:
       matrix:
         directory:
           - operators/kube-rs-building-cronjob
-          - operators/poc-secondary-resource-management
+          - poc-secondary-resource-management
     uses: ./.github/workflows/scheduled.yml
     with:
       directory: ${{ matrix.directory }}

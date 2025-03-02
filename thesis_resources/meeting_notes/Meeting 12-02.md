@@ -25,7 +25,7 @@
     - Often good code documentation
 - Upgrade / update [mongodbSpammer](https://github.com/idlab-discover/wasm-operator/tree/main/controllers/mongodbSpammer) in order to verify proper behavior of the Percona operator
 - Further research in the need of scheduled reconcilation for the Percona MongoDB operator
-  - See [the findings file on the topic](../findings/investigation_percona_mongodb_reconcile.md)
+  - See [the findings file on the topic](../findings/investigation_reconcile_percona_mongodb.md)
 
 ### Subjects to discuss
 
@@ -33,9 +33,9 @@
   - End conclusion: the operator currently doesn't watch all resources controlled by the CR
     - It only manages the primary resources, not the secondary resources
     - Multiple PR's created to fix the issue [PR: 880](https://github.com/percona/percona-server-mongodb-operator/pull/880), [PR: 1068](https://github.com/percona/percona-server-mongodb-operator/pull/1068)
-    - Other operators also fit in this view (see [investigation other operators](../findings/investigation_other_operators.md))
+    - Other operators also fit in this view (see [investigation other operators](../findings/investigation_reconcile_other_operators.md))
   - Also makes supporting sidecar containers easier
-  - See further discussion in [the findings file on the topic](../findings/investigation_percona_mongodb_reconcile.md)
+  - See further discussion in [the findings file on the topic](../findings/investigation_reconcile_percona_mongodb.md)
 - Creating a PoC
   - How should the operator be created
     - Modify existing operator in the WASM-operator group

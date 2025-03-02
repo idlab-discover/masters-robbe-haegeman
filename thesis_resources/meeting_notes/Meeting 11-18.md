@@ -10,7 +10,7 @@
   - information on operators for testing
   - planning
   - sources
-- Found code responsible for scheduled reconcilation in Percona MongoDB ([link](../findings/investigation_percona_mongodb_reconcile.md))
+- Found code responsible for scheduled reconcilation in Percona MongoDB ([link](../findings/investigation_reconcile_percona_mongodb.md))
 - Further research into how scheduled reconcilation is implemented and why you should or should not use it ([link](../findings/configuration_schedule.md))
 - Further research into the architecture of Kube.rs operators and how they compare to the visualization from Kubebuilder
 - (Further progress in following Kube.rs guides and reading the "Kubernetes in Action" book)

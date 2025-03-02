@@ -13,11 +13,11 @@ on:
     branches: [main]
     paths:
       - operators/kube-rs-building-cronjob/**
-      - operators/poc-secondary-resource-management/**
+      - poc-secondary-resource-management/**
   pull_request:
     paths:
       - operators/kube-rs-building-cronjob/**
-      - operators/poc-secondary-resource-management/**
+      - poc-secondary-resource-management/**
 # If new code is pushed to a PR branch, then cancel in progress workflows for that PR. Ensures that
 # we don't waste CI time, and returns results quicker https://github.com/jonhoo/rust-ci-conf/pull/5
 concurrency:
@@ -37,7 +37,7 @@ jobs:
         with:
           filters: |
             operators/kube-rs-building-cronjob: operators/kube-rs-building-cronjob
-            operators/poc-secondary-resource-management: operators/poc-secondary-resource-management
+            poc-secondary-resource-management: poc-secondary-resource-management
   use-check:
     needs: changes
     strategy:

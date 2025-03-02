@@ -1,4 +1,8 @@
-# Notes - Operators used for reconcile behavior testing
+# Resources for investigation Percona MongoDB operator
+
+These are the resources used in the investigation of the [MongoDB operator from Percona](https://github.com/percona/percona-server-mongodb-operator).
+
+## Testing environment
 
 The operators are currently investigated in the following environment:
 
