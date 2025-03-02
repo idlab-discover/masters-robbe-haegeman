@@ -1,8 +1,7 @@
 use std::sync::Arc;
 use std::time::Duration;
 
-use crate::crd::{self};
-use crate::error::{Error, Result};
+use crate::crd;
 use crate::reconcile_sec_res;
 use futures::StreamExt;
 use k8s_openapi::api::apps;
@@ -11,6 +10,8 @@ use kube::core::object::HasSpec;
 use kube::runtime::{watcher, Controller};
 use kube::{runtime::controller::Action, Api};
 use kube::{Client, ResourceExt};
+use lib::error::{Error, Result};
+use lib::PrimaryResource;
 
 const LABEL_KUBERNETES_REPLSET: &str = "app.kubernetes.io/replset";
 const LABEL_KUBERNETES_COMPONENT: &str = "app.kubernetes.io/component";
@@ -25,12 +26,16 @@ pub async fn run(ctx: Arc<Context>) {
     let client = ctx.client.clone();
     let api: Api<crd::Database> = Api::all(client.clone());
 
-    Controller::new(api, watcher::Config::default())
-        .shutdown_on_signal()
-        .run(reconcile, error_policy, ctx)
-        .filter_map(|x| async move { std::result::Result::ok(x) })
-        .for_each(|_| futures::future::ready(()))
-        .await;
+    crd::Database::setup_watches(
+        Controller::new(api, watcher::Config::default()),
+        client.clone(),
+        None,
+    )
+    .shutdown_on_signal()
+    .run(reconcile, error_policy, ctx)
+    .filter_map(|x| async move { std::result::Result::ok(x) })
+    .for_each(|_| futures::future::ready(()))
+    .await;
 }
 
 pub async fn reconcile(g: Arc<crd::Database>, ctx: Arc<Context>) -> Result<Action> {

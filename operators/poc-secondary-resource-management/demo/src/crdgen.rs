@@ -1,7 +1,7 @@
+pub mod crd;
+
 use kube::CustomResourceExt;
 use std::fs::File;
-
-use controller::crd;
 
 fn main() {
     let path = std::path::Path::new("crd/database.yaml");
