@@ -69,16 +69,16 @@ grep -F "[use-reusable-2/check/stable / fmt" act.log
 This code is still in active development.
 Below is an overview of the `act` output:
 
-| Job                                                 | Success | Reason for failure |
-|-----------------------------------------------------|---------|--------------------|
-| use-reusable-{1,2}/rolling/ubuntu / nightly         |   ✅    |                    |
-| use-reusable-{1,2}/rolling/ubuntu / beta / updated  |   ✅    |                    |
-| use-reusable-{1,2}/check/stable / fmt               |   ✅    |                    |
-| use-reusable-{1,2}/check/stable / clippy-1          |   ❌    | environment variable $REVIEWDOG_GITHUB_API_TOKEN is not set + probably wrong directory |
-| use-reusable-{1,2}/check/beta / clippy-2            |   ❌    | environment variable $REVIEWDOG_GITHUB_API_TOKEN is not set + probably wrong directory |
-| use-reusable-{1,2}/check/nightly / doc              |   ✅    |                    |
-| use-reusable-{1,2}/check/ubuntu / stable / features |   ✅    |                    |
-| use-reusable-{1,2}/check/ubuntu / 1.77.2            |   ✅    |                    |
+| Job                                                 | Success | Reason for failure                                          |
+|-----------------------------------------------------|---------|-------------------------------------------------------------|
+| use-reusable-{1,2}/rolling/ubuntu / nightly         |   ✅    |                                                             |
+| use-reusable-{1,2}/rolling/ubuntu / beta / updated  |   ✅    |                                                             |
+| use-reusable-{1,2}/check/stable / fmt               |   ✅    |                                                             |
+| use-reusable-{1,2}/check/stable / clippy-1          |   ❌    | environment variable $REVIEWDOG_GITHUB_API_TOKEN is not set |
+| use-reusable-{1,2}/check/beta / clippy-2            |   ❌    | environment variable $REVIEWDOG_GITHUB_API_TOKEN is not set |
+| use-reusable-{1,2}/check/nightly / doc              |   ✅    |                                                             |
+| use-reusable-{1,2}/check/ubuntu / stable / features |   ✅    |                                                             |
+| use-reusable-{1,2}/check/ubuntu / 1.77.2            |   ✅    |                                                             |
 
 > [!NOTE]
 > The {1,2} value was added in post, since most jobs failed / succeeded in the same way in both dirs
