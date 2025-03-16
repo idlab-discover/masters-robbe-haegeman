@@ -1,6 +1,7 @@
 pub mod error;
 
 use crate::error::{Error, Result};
+use async_trait::async_trait;
 use either::Either;
 
 use kube::{
@@ -15,14 +16,14 @@ use kube::{
 use serde::{Serialize, de::DeserializeOwned};
 use std::fmt::Debug;
 
+// https://fasterthanli.me/articles/catching-up-with-async-rust
+// https://smallcultfollowing.com/babysteps/blog/2019/10/26/async-fn-in-traits-are-hard/
+#[async_trait]
 pub trait PrimaryResource: kube::ResourceExt {
     fn initialize_status(&mut self);
     fn cache_secondary(&self) -> Result<&Vec<DynamicObject>>;
     fn cache_secondary_mut(&mut self) -> Result<&mut Vec<DynamicObject>>;
 
-    // https://fasterthanli.me/articles/catching-up-with-async-rust
-    // https://smallcultfollowing.com/babysteps/blog/2019/10/26/async-fn-in-traits-are-hard/
-    // Could be that we will have to transition to the async_trait crate down the line, but would introduce Send restriction
     async fn get_secondary<
         K: kube::Resource<Scope = k8s_openapi::NamespaceResourceScope>
             + Clone
@@ -77,7 +78,9 @@ pub trait PrimaryResource: kube::ResourceExt {
             + Clone
             + Debug
             + Serialize
-            + DeserializeOwned,
+            + DeserializeOwned
+            + Send
+            + Sync,
     >(
         &mut self,
         client: Client,
@@ -159,7 +162,9 @@ pub trait PrimaryResource: kube::ResourceExt {
             + Clone
             + Debug
             + Serialize
-            + DeserializeOwned,
+            + DeserializeOwned
+            + Send
+            + Sync,
     >(
         &mut self,
         client: Client,
