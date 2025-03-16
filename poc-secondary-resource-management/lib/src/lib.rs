@@ -4,15 +4,15 @@ use crate::error::{Error, Result};
 use either::Either;
 use k8s_openapi::api::core;
 use kube::{
+    Api, Client, Resource, ResourceExt,
     api::{
         ApiResource, DeleteParams, DynamicObject, ListParams, ObjectList, Patch, PatchParams,
         PostParams,
     },
     core::Status,
-    runtime::{watcher, Controller},
-    Api, Client, Resource, ResourceExt,
+    runtime::{Controller, watcher},
 };
-use serde::{de::DeserializeOwned, Serialize};
+use serde::{Serialize, de::DeserializeOwned};
 use std::fmt::Debug;
 
 pub trait PrimaryResource: kube::ResourceExt {

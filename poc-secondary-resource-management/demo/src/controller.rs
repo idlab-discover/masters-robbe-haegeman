@@ -7,11 +7,11 @@ use futures::StreamExt;
 use k8s_openapi::api::apps;
 use kube::api::DeleteParams;
 use kube::core::object::HasSpec;
-use kube::runtime::{watcher, Controller};
-use kube::{runtime::controller::Action, Api};
+use kube::runtime::{Controller, watcher};
+use kube::{Api, runtime::controller::Action};
 use kube::{Client, ResourceExt};
-use lib::error::{Error, Result};
 use lib::PrimaryResource;
+use lib::error::{Error, Result};
 
 const LABEL_KUBERNETES_REPLSET: &str = "app.kubernetes.io/replset";
 const LABEL_KUBERNETES_COMPONENT: &str = "app.kubernetes.io/component";
