@@ -32,6 +32,10 @@ jobs:
     outputs:
       directories: ${{ steps.filter.outputs.changes }}
     steps:
+      # Required for paths-filter to work on commits
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
       - uses: dorny/paths-filter@v3
         id: filter
         with:
