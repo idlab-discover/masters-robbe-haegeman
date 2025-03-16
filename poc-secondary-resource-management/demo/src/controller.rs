@@ -4,7 +4,7 @@ use std::time::Duration;
 use crate::crd;
 use crate::reconcile_sec_res;
 use futures::StreamExt;
-use k8s_openapi::api::apps;
+use k8s_openapi::api::{apps, core};
 use kube::api::DeleteParams;
 use kube::core::object::HasSpec;
 use kube::runtime::{Controller, watcher};
@@ -26,7 +26,7 @@ pub async fn run(ctx: Arc<Context>) {
     let client = ctx.client.clone();
     let api: Api<crd::Database> = Api::all(client.clone());
 
-    crd::Database::setup_watches(
+    crd::Database::setup_watches::<core::v1::Secret>(
         Controller::new(api, watcher::Config::default()),
         client.clone(),
         None,

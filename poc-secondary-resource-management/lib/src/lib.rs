@@ -2,7 +2,7 @@ pub mod error;
 
 use crate::error::{Error, Result};
 use either::Either;
-use k8s_openapi::api::core;
+
 use kube::{
     Api, Client, Resource, ResourceExt,
     api::{
@@ -231,19 +231,28 @@ pub trait PrimaryResource: kube::ResourceExt {
     }
 
     // Where clause was directly taken from [owns](https://docs.rs/kube/latest/kube/runtime/struct.Controller.html#method.owns) apart from Sync, which was required by the compiler
-    fn setup_watches(
+    fn setup_watches<
+        Child: kube::Resource<Scope = k8s_openapi::NamespaceResourceScope>
+            + Clone
+            + Debug
+            + DeserializeOwned
+            + Send
+            + Resource<DynamicType = ()>
+            + 'static,
+    >(
         controller: Controller<Self>,
         client: Client,
         ns: Option<&str>,
     ) -> Controller<Self>
     where
-        Self: Clone + Resource<DynamicType = ()> + DeserializeOwned + Debug + Send + Sync + 'static,
+        Self: Clone + Resource + DeserializeOwned + Debug + Send + Sync + 'static,
+        Self::DynamicType: Eq + std::hash::Hash + Clone,
     {
-        let secret_api: Api<core::v1::Secret> = if let Some(ns) = ns {
+        let resource_api: Api<Child> = if let Some(ns) = ns {
             Api::namespaced(client.clone(), ns)
         } else {
             Api::all(client.clone())
         };
-        controller.owns(secret_api, watcher::Config::default())
+        controller.owns(resource_api, watcher::Config::default())
     }
 }
