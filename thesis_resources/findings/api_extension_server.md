@@ -10,3 +10,4 @@ Discussed in [Meeting 10/03/25](../meeting_notes/Meeting%2003-10.md)
 - <https://docs.rs/axum/latest/axum/>
   - Axum because already in Tokio ecosystem
   - And used in tutorial
+- <https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/apiserver-aggregation/>
