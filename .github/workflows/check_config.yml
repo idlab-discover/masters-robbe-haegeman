@@ -40,8 +40,8 @@ jobs:
         id: filter
         with:
           filters: |
-            operators/kube-rs-building-cronjob: operators/kube-rs-building-cronjob
-            poc-secondary-resource-management: poc-secondary-resource-management
+            operators/kube-rs-building-cronjob: operators/kube-rs-building-cronjob/**
+            poc-secondary-resource-management: poc-secondary-resource-management/**
   use-check:
     needs: changes
     strategy:
