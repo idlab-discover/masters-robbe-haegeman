@@ -17,8 +17,8 @@ use std::fmt::Debug;
 
 pub trait PrimaryResource: kube::ResourceExt {
     fn initialize_status(&mut self);
-    fn secondary_resources(&self) -> Result<&Vec<DynamicObject>>;
-    fn secondary_resources_mut(&mut self) -> Result<&mut Vec<DynamicObject>>;
+    fn cache_secondary(&self) -> Result<&Vec<DynamicObject>>;
+    fn cache_secondary_mut(&mut self) -> Result<&mut Vec<DynamicObject>>;
 
     // https://fasterthanli.me/articles/catching-up-with-async-rust
     // https://smallcultfollowing.com/babysteps/blog/2019/10/26/async-fn-in-traits-are-hard/
@@ -109,7 +109,7 @@ pub trait PrimaryResource: kube::ResourceExt {
             .await
             .map_err(Error::KubeError)?;
 
-        self.secondary_resources_mut()?.push(DynamicObject::new(
+        self.cache_secondary_mut()?.push(DynamicObject::new(
             &resource.name_any(),
             &ApiResource::erase::<K>(&K::DynamicType::default()),
         ));
@@ -117,7 +117,7 @@ pub trait PrimaryResource: kube::ResourceExt {
         log::info!(
             "{}: Current secondary resources vec: {:?}",
             self.name_any(),
-            self.secondary_resources().unwrap_or(&Vec::new())
+            self.cache_secondary().unwrap_or(&Vec::new())
         );
 
         Ok(resource)
@@ -196,13 +196,13 @@ pub trait PrimaryResource: kube::ResourceExt {
             &ApiResource::erase::<K>(&K::DynamicType::default()),
         );
 
-        let sec_resources = self.secondary_resources_mut()?;
-        let old_resource = sec_resources
+        let sec_resources = self.cache_secondary_mut()?;
+        let cached_resource = sec_resources
             .iter_mut()
-            .find(|old_resource| old_resource.name_any() == new_res.name_any());
+            .find(|cached_resource| cached_resource.name_any() == new_res.name_any());
 
-        if let Some(old_resource) = old_resource {
-            *old_resource = res_dyn;
+        if let Some(cached_resource) = cached_resource {
+            *cached_resource = res_dyn;
         } else {
             sec_resources.push(res_dyn);
         }
@@ -216,13 +216,13 @@ pub trait PrimaryResource: kube::ResourceExt {
         &mut self,
         new_res: &K,
     ) -> Result<()> {
-        let sec_resources = self.secondary_resources_mut()?;
-        let old_resource_index = sec_resources
+        let sec_resources = self.cache_secondary_mut()?;
+        let cached_resource_index = sec_resources
             .iter()
-            .position(|old_resource| old_resource.name_any() == new_res.name_any());
+            .position(|cached_resource| cached_resource.name_any() == new_res.name_any());
 
-        if let Some(old_resource_index) = old_resource_index {
-            sec_resources.swap_remove(old_resource_index);
+        if let Some(cached_resource_index) = cached_resource_index {
+            sec_resources.swap_remove(cached_resource_index);
         } else {
             return Err(Error::InvalidDeleteError(new_res.name_any()));
         }

@@ -1,7 +1,7 @@
-use kube::{ResourceExt, api::DynamicObject, core::object::HasStatus};
+use kube::{api::DynamicObject, core::object::HasStatus, ResourceExt};
 use kube_derive::CustomResource;
-use lib::PrimaryResource;
 use lib::error::{Error, Result};
+use lib::PrimaryResource;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
@@ -32,14 +32,14 @@ impl PrimaryResource for Database {
         })
     }
 
-    fn secondary_resources(&self) -> Result<&Vec<DynamicObject>> {
+    fn cache_secondary(&self) -> Result<&Vec<DynamicObject>> {
         Ok(&self
             .status()
             .ok_or(Error::MissingStatusError(self.name_any()))?
             .sec_recs)
     }
 
-    fn secondary_resources_mut(&mut self) -> Result<&mut Vec<DynamicObject>> {
+    fn cache_secondary_mut(&mut self) -> Result<&mut Vec<DynamicObject>> {
         log::info!("Requesting secondary resources");
         let name = self.name_any().clone();
         if let Some(status) = self.status_mut() {
