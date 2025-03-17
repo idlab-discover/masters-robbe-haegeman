@@ -88,18 +88,24 @@ All information is included in this repository. Everything relevant to the proto
 | Period | Tasks |
 | ------ | ----- |
 | 27/09 - 07/10 | <ul><li>Go through previous master theses</li><li>Research what operators do when activated</li><li>Investigate how events work on client and server side and why these aren't enough for the WASM-operator</li></ul> |
-| 7/10 - 21/10 | <ul><li>Analyze Van Landuyt's K.'s operators for the wake-up behavior by investigating the code and traces</li></ul> |
-| 21/10 - 4/11 | <ul><li>Analyze Van Landuyt's K.'s operators for the wake-up behavior by investigating the code and traces</li><li>Compare the operator(/controller) architecture from Kubebuilder with kube.rs</li></ul> |
-| 4/11 - 18/11 | <ul><li>Compare the operator(/controller) architecture from Kubebuilder with kube.rs</li><li>Investigate how scheduled reconcilation is implemented and why</li></ul> |
-| 18/11 - 2/12| <ul><li>Run the WASM-prototype locally and investigate further</li><li>Find which parts of the Percona MongoDB operator enforce the use of scheduled reconcilation</li><li>Continue learning Kube.rs</li></ul> |
-| 2/12 - 11/12| <ul><li>Work toward prototype solution</li><li>Work on presentation</li><li>Create first draft of thesis</li></ul> |
-| 11/12 - 19/12| <ul><li>Add automatic watches to PoC</li><li>Implement feedback presentation</li><li>Create first draft of thesis</li></ul> |
+| 07/10 - 21/10 | <ul><li>Analyze Van Landuyt's K.'s operators for the wake-up behavior by investigating the code and traces</li></ul> |
+| 21/10 - 04/11 | <ul><li>Analyze Van Landuyt's K.'s operators for the wake-up behavior by investigating the code and traces</li><li>Compare the operator(/controller) architecture from Kubebuilder with kube.rs</li></ul> |
+| 04/11 - 18/11 | <ul><li>Compare the operator(/controller) architecture from Kubebuilder with kube.rs</li><li>Investigate how scheduled reconcilation is implemented and why</li></ul> |
+| 18/11 - 02/12 | <ul><li>Run the WASM-prototype locally and investigate further</li><li>Find which parts of the Percona MongoDB operator enforce the use of scheduled reconcilation</li><li>Continue learning Kube.rs</li></ul> |
+| 02/12 - 11/12 | <ul><li>Work toward prototype solution</li><li>Work on presentation</li><li>Create first draft of thesis</li></ul> |
+| 11/12 - 19/12 | <ul><li>Implement automatic watches in PoC</li><li>Implement feedback presentation</li><li>Create first draft of thesis</li></ul> |
 
 #### Semester 2
 
-<div align="center">
-  <img alt="planning second semester" src="./attachments/planning.png" width="85%"/>
-</div>
+| Period | Tasks |
+| ------ | ----- |
+| 10/02 - 24/02 | <ul><li>Implement automatic watches in PoC</li></ul> |
+| 24/02 - 10/03 | <ul><li>Implement automatic watches in PoC</li><li>Improve K8s API integration</li></ul> |
+| 10/03 - 24/03 | <ul><li>Improve K8s API integration</li><li>Separate reconcile functions</li></ul> |
+| 24/03 - 07/04 | <ul><li>Separate reconcile functions</li></ul> |
+| 07/04 - 21/04 | <ul><li>Kubebuilder support</li></ul> |
+| 21/04 - 05/05 | <ul><li>Kubebuilder support</li><li>Benchmarks + Evaluation</li></ul> |
+| 05/05 - 19/05 | <ul><li>Benchmarks + Evaluation</li><li>Extended abstract</li></ul> |
 
 ## Copyright
 
