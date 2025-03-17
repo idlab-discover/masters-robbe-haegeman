@@ -1,7 +1,7 @@
 # Master thesis project - Edge Kubernetes with WebAssembly
 
 <div align="center">
-   <img alt="project mascot: Ferris the crab holding the Kubernetes logo with a WASM backpack" src="./thesis_resources/meeting_notes/attachments/mascot.png" width="500" />
+   <img alt="project mascot: Ferris the crab holding the Kubernetes logo with a WASM backpack" src="./attachments/mascot.png" width="500" />
 </div>
 
 ## Overview
@@ -83,6 +83,8 @@ All information is included in this repository. Everything relevant to the proto
 
 ### Planning
 
+#### Semester 1
+
 | Period | Tasks |
 | ------ | ----- |
 | 27/09 - 07/10 | <ul><li>Go through previous master theses</li><li>Research what operators do when activated</li><li>Investigate how events work on client and server side and why these aren't enough for the WASM-operator</li></ul> |
@@ -92,6 +94,10 @@ All information is included in this repository. Everything relevant to the proto
 | 18/11 - 2/12| <ul><li>Run the WASM-prototype locally and investigate further</li><li>Find which parts of the Percona MongoDB operator enforce the use of scheduled reconcilation</li><li>Continue learning Kube.rs</li></ul> |
 | 2/12 - 11/12| <ul><li>Work toward prototype solution</li><li>Work on presentation</li><li>Create first draft of thesis</li></ul> |
 | 11/12 - 19/12| <ul><li>Add automatic watches to PoC</li><li>Implement feedback presentation</li><li>Create first draft of thesis</li></ul> |
+
+#### Semester 2
+
+![]()
 
 ## Copyright
 

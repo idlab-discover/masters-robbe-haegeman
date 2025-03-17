@@ -49,7 +49,7 @@
 #### Miscellaneous
 
 - Create a logo (first draft)
-  - ![Ferris the crab with a WASM backpack, holding the Kubernetes logo](./attachments/mascot.png)
+  - ![Ferris the crab with a WASM backpack, holding the Kubernetes logo](../../attachments/mascot.png)
 
 ### Subjects to discuss
 
