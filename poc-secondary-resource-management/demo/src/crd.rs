@@ -1,5 +1,4 @@
-use kube::{ResourceExt, api::DynamicObject, core::object::HasStatus};
-use kube_derive::CustomResource;
+use kube::{CustomResource, ResourceExt, api::DynamicObject, core::object::HasStatus};
 use lib::PrimaryResource;
 use lib::error::{Error, Result};
 use schemars::JsonSchema;

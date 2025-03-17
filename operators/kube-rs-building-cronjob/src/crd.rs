@@ -2,7 +2,7 @@ use k8s_openapi::{
     api::{batch, core},
     apimachinery::pkg::apis::meta,
 };
-use kube_derive::CustomResource;
+use kube::CustomResource;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
