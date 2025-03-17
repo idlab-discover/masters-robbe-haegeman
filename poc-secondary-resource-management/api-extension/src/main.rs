@@ -1,13 +1,24 @@
-use axum::{Json, Router, extract::Path, routing::get};
-use serde_json::{Value, json};
+use axum::{Json, Router, response::IntoResponse, routing::get};
+use k8s_openapi::apimachinery::pkg::apis::meta::v1::{APIResource, APIResourceList};
+use kube::Resource;
 use tower::ServiceBuilder;
 use tower_http::trace::TraceLayer;
+
+mod resources;
 
 #[tokio::main]
 async fn main() {
     // build our application with a single route
     let app = Router::new()
-        .route("/{user_id}", get(basic_handler))
+        .route("apis/farm.example.com/v1alpha", get(get_api_resources))
+        .route(
+            "/apis/farm.example.com/v1alpha/namespaces/:namespace/llamas",
+            get(resources::list_llamas),
+        )
+        .route(
+            "/apis/farm.example.com/v1alpha/namespaces/:namespace/llamas/:name",
+            get(resources::get_llama),
+        )
         .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()));
 
     // run our app with hyper, listening globally on port 3000
@@ -15,6 +26,16 @@ async fn main() {
     axum::serve(listener, app).await.unwrap();
 }
 
-async fn basic_handler(Path(user_id): Path<u32>) -> Json<Value> {
-    Json(json!({"user_id": user_id}))
+async fn get_api_resources() -> impl IntoResponse {
+    Json(APIResourceList {
+        group_version: String::from("farm.example.com/v1alpha"),
+        resources: vec![APIResource {
+            group: Some(resources::Llama::group(&()).into()),
+            kind: resources::Llama::kind(&()).into(),
+            name: resources::Llama::plural(&()).into(),
+            namespaced: true,
+            verbs: vec![String::from("list"), String::from("get")],
+            ..Default::default()
+        }],
+    })
 }
