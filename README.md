@@ -1,7 +1,7 @@
 # Master thesis project - Edge Kubernetes with WebAssembly
 
 <div align="center">
-   <img alt="project mascot: Ferris the crab holding the Kubernetes logo with a WASM backpack" src="./attachments/mascot.png" width="500" />
+  <img alt="project mascot: Ferris the crab holding the Kubernetes logo with a WASM backpack" src="./attachments/mascot.png" width="500" />
 </div>
 
 ## Overview
@@ -97,7 +97,9 @@ All information is included in this repository. Everything relevant to the proto
 
 #### Semester 2
 
-![]()
+<div align="center">
+  <img alt="planning second semester" src="./attachments/planning.png" width="85%"/>
+</div>
 
 ## Copyright
 
