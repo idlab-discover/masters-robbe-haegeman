@@ -24,6 +24,7 @@ async fn main() {
 
     let app = Router::new()
         .route("/apis/poc.sec.res.kinds/v1/health", get(get_health))
+        .route("/apis/poc.sec.res.kinds/v1", get(get_status))
         .layer(
             ServiceBuilder::new().layer(
                 TraceLayer::new_for_http()
@@ -57,4 +58,9 @@ async fn main() {
 
 async fn get_health() -> impl IntoResponse {
     "OK"
+}
+
+// This is a temporary method which will get filled in using kube.rs and k8s_openapi types
+async fn get_status() -> impl IntoResponse {
+    "{}"
 }

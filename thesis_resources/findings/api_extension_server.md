@@ -18,3 +18,5 @@ Discussed in [Meeting 10/03/25](../meeting_notes/Meeting%2003-10.md)
   - Axum because already in Tokio ecosystem
   - And used in tutorial
 - <https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/apiserver-aggregation/>
+- <https://kind.sigs.k8s.io/docs/user/configuration/>
+- <https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/control-plane-flags/>
