@@ -50,5 +50,5 @@ jobs:
     uses: ./.github/workflows/check.yml
     with:
       directory: ${{ matrix.directory }}
-      msrv: "1.81"
+      msrv: "1.85" # Edition 2024
     secrets: inherit
