@@ -1,7 +1,9 @@
 use std::net::SocketAddr;
 
+use axum::Json;
 use axum::{Router, response::IntoResponse, routing::get};
 use axum_server::tls_rustls::RustlsConfig;
+use k8s_openapi::apimachinery::pkg::apis::meta::v1::APIResourceList;
 use tower::ServiceBuilder;
 use tower_http::trace::{DefaultOnRequest, DefaultOnResponse, TraceLayer};
 use tracing::level_filters::LevelFilter;
@@ -10,6 +12,9 @@ use tracing_subscriber::filter::EnvFilter;
 use tracing_subscriber::fmt;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
+
+const GROUP: &str = "poc.sec.res.kinds";
+const VERSION: &str = "v1";
 
 #[tokio::main]
 async fn main() {
@@ -24,7 +29,7 @@ async fn main() {
 
     let app = Router::new()
         .route("/apis/poc.sec.res.kinds/v1/health", get(get_health))
-        .route("/apis/poc.sec.res.kinds/v1", get(get_status))
+        .route("/apis/poc.sec.res.kinds/v1", get(get_api_resources))
         .layer(
             ServiceBuilder::new().layer(
                 TraceLayer::new_for_http()
@@ -60,7 +65,9 @@ async fn get_health() -> impl IntoResponse {
     "OK"
 }
 
-// This is a temporary method which will get filled in using kube.rs and k8s_openapi types
-async fn get_status() -> impl IntoResponse {
-    "{}"
+async fn get_api_resources() -> impl IntoResponse {
+    Json(APIResourceList {
+        group_version: std::format!("{}/{}", GROUP, VERSION),
+        resources: vec![],
+    })
 }
