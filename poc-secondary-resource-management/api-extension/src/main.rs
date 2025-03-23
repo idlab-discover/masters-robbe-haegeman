@@ -4,24 +4,45 @@ use kube::Resource;
 use tower::ServiceBuilder;
 use tower_http::trace::TraceLayer;
 
+use tower_http::trace::{DefaultOnRequest, DefaultOnResponse};
+use tracing::Level;
+use tracing::level_filters::LevelFilter;
+use tracing_subscriber::filter::EnvFilter;
+use tracing_subscriber::fmt;
+use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::util::SubscriberInitExt;
+
 mod resources;
 
 #[tokio::main]
 async fn main() {
-    // build our application with a single route
+    tracing_subscriber::registry()
+        .with(fmt::layer())
+        .with(
+            EnvFilter::builder()
+                .with_default_directive(LevelFilter::INFO.into())
+                .from_env_lossy(),
+        )
+        .init();
+
     let app = Router::new()
-        .route("apis/farm.example.com/v1alpha", get(get_api_resources))
+        .route("/apis/farm.example.com/v1alpha", get(get_api_resources))
         .route(
-            "/apis/farm.example.com/v1alpha/namespaces/:namespace/llamas",
+            "/apis/farm.example.com/v1alpha/namespaces/{namespace}/llamas",
             get(resources::list_llamas),
         )
         .route(
-            "/apis/farm.example.com/v1alpha/namespaces/:namespace/llamas/:name",
+            "/apis/farm.example.com/v1alpha/namespaces/{namespace}/llamas/{name}",
             get(resources::get_llama),
         )
-        .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()));
+        .layer(
+            ServiceBuilder::new().layer(
+                TraceLayer::new_for_http()
+                    .on_request(DefaultOnRequest::new().level(Level::INFO))
+                    .on_response(DefaultOnResponse::new().level(Level::INFO)),
+            ),
+        );
 
-    // run our app with hyper, listening globally on port 3000
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
