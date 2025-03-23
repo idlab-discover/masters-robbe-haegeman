@@ -1,10 +1,11 @@
-use axum::{Router, response::IntoResponse, routing::get};
-use tower::ServiceBuilder;
-use tower_http::trace::TraceLayer;
+use std::net::SocketAddr;
 
-use tower_http::trace::{DefaultOnRequest, DefaultOnResponse};
-use tracing::Level;
+use axum::{Router, response::IntoResponse, routing::get};
+use axum_server::tls_rustls::RustlsConfig;
+use tower::ServiceBuilder;
+use tower_http::trace::{DefaultOnRequest, DefaultOnResponse, TraceLayer};
 use tracing::level_filters::LevelFilter;
+use tracing::{Level, span, trace};
 use tracing_subscriber::filter::EnvFilter;
 use tracing_subscriber::fmt;
 use tracing_subscriber::layer::SubscriberExt;
@@ -31,8 +32,27 @@ async fn main() {
             ),
         );
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
-    axum::serve(listener, app).await.unwrap();
+    let span = span!(Level::TRACE, "Key management");
+    let handle = span.enter();
+    let tls_cert = rcgen::generate_simple_self_signed(vec!["localhost".to_string()]).unwrap();
+    trace!("Generated certificate: {}", tls_cert.cert.pem());
+    trace!(
+        "Generated private key: {}",
+        tls_cert.key_pair.serialize_pem()
+    );
+    let tls_config = RustlsConfig::from_pem(
+        tls_cert.cert.pem().into_bytes(),
+        tls_cert.key_pair.serialize_pem().into_bytes(),
+    )
+    .await
+    .unwrap();
+    drop(handle);
+
+    let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
+    axum_server::bind_rustls(addr, tls_config)
+        .serve(app.into_make_service())
+        .await
+        .unwrap();
 }
 
 async fn get_health() -> impl IntoResponse {
