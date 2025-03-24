@@ -1,4 +1,4 @@
-# Master thesis project - Edge Kubernetes with WebAssembly
+# Master thesis project - Improving event-based Kubernetes controller APIs
 
 <div align="center">
   <img alt="project mascot: Ferris the crab holding the Kubernetes logo with a WASM backpack" src="./attachments/mascot.png" width="500" />
@@ -8,6 +8,7 @@
 
 This repository contains resources for my master's thesis focused on optimizing Kubernetes operators for edge orchestration using WebAssembly.  
 Building on the prototype of Ramlot T. and Van Landuyt K., this project aims to find alternative solutions to wake-up behavior in operators, causing inefficiencies within the WebAssembly-based environment.
+The chosen subject was *"Edge Kubernetes with WebAssembly"*, but the project evolved (partially) away from there.
 
 ## Background
 
