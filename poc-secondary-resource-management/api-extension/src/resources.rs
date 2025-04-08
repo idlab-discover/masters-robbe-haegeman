@@ -1,6 +1,6 @@
-use axum::{Json, extract::Path, response::IntoResponse};
+use axum::{Json, extract::Path, http::StatusCode, response::IntoResponse};
 use k8s_openapi::api::core;
-use kube::{Api, Client};
+use kube::{Api, Client, ResourceExt};
 
 use crate::{API_VERSION, GROUP};
 
@@ -32,14 +32,31 @@ pub(crate) async fn get_primary_resource(
 ) -> impl IntoResponse {
     let client = Client::try_default().await.expect("Client Creation Error");
 
-    let prim_res = MockResource {
+    let mut prim_res = MockResource {
         name,
         sec_res: vec![],
     };
 
-    Json(serde_json::json!({
-        "apiVersion": MockResource::api_version(),
-        "kind": MockResource::kind(),
-        "sec_res": prim_res.sec_res,
-    }))
+    match Api::<core::v1::Pod>::namespaced(client, &namespace)
+        .get(&prim_res.name)
+        .await
+    {
+        Ok(pod) => {
+            prim_res.sec_res.push(pod.name_any());
+            Json(serde_json::json!({
+                "apiVersion": MockResource::api_version(),
+                "kind": MockResource::kind(),
+                "sec_res": prim_res.sec_res,
+            }))
+            .into_response()
+        }
+        Err(_) => (
+            StatusCode::NOT_FOUND,
+            format!(
+                "The resource {} in ns: {} does not exist",
+                prim_res.name, namespace
+            ),
+        )
+            .into_response(),
+    }
 }
