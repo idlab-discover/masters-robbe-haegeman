@@ -3,7 +3,7 @@ use std::net::SocketAddr;
 use axum::Json;
 use axum::{Router, response::IntoResponse, routing::get};
 use axum_server::tls_rustls::RustlsConfig;
-use k8s_openapi::apimachinery::pkg::apis::meta::v1::APIResourceList;
+use k8s_openapi::apimachinery::pkg::apis::meta::v1::{APIResource, APIResourceList};
 use tower::ServiceBuilder;
 use tower_http::trace::{DefaultOnRequest, DefaultOnResponse, TraceLayer};
 use tracing::level_filters::LevelFilter;
@@ -13,8 +13,11 @@ use tracing_subscriber::fmt;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 
+mod resources;
+
 const GROUP: &str = "poc.sec.res.kinds";
 const VERSION: &str = "v1";
+const API_VERSION: &str = "poc.sec.res.kinds/v1";
 
 #[tokio::main]
 async fn main() {
@@ -30,6 +33,10 @@ async fn main() {
     let app = Router::new()
         .route("/apis/poc.sec.res.kinds/v1/health", get(get_health))
         .route("/apis/poc.sec.res.kinds/v1", get(get_api_resources))
+        .route(
+            "/apis/poc.sec.res.kinds/v1/namespaces/{namespace}/primary/{name}",
+            get(resources::get_primary_resource),
+        )
         .layer(
             ServiceBuilder::new().layer(
                 TraceLayer::new_for_http()
@@ -68,6 +75,13 @@ async fn get_health() -> impl IntoResponse {
 async fn get_api_resources() -> impl IntoResponse {
     Json(APIResourceList {
         group_version: std::format!("{}/{}", GROUP, VERSION),
-        resources: vec![],
+        resources: vec![APIResource {
+            group: Some(String::from(resources::MockResource::group())),
+            kind: String::from(resources::MockResource::kind()),
+            name: String::from(resources::MockResource::plural()),
+            namespaced: true,
+            verbs: vec![String::from("get")],
+            ..Default::default()
+        }],
     })
 }
