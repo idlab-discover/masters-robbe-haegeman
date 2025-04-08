@@ -51,9 +51,11 @@ pub(crate) async fn get_primary_resource(
             .into_response()
         }
         Err(_) => (
-            StatusCode::NOT_FOUND,
+            // Not 404 since that is captured by Kubernetes and transformed in:
+            // "Error from server (NotFound): the server could not find the requested resource"
+            StatusCode::UNPROCESSABLE_ENTITY,
             format!(
-                "The resource {} in ns: {} does not exist",
+                "The resource \"{}\" in ns \"{}\" does not exist",
                 prim_res.name, namespace
             ),
         )
