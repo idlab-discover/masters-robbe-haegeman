@@ -73,10 +73,11 @@ metadata:
   name: api-extension-multi-kinds
 rules:
   - apiGroups:
-      - apps
+      - "*"
     resources:
-      - deployments
+      - "*"
     verbs:
+      - list
       - get
 ---
 apiVersion: rbac.authorization.k8s.io/v1
