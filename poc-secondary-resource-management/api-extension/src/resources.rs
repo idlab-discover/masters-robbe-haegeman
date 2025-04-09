@@ -1,6 +1,7 @@
 use axum::{Json, extract::Path, http::StatusCode, response::IntoResponse};
-use k8s_openapi::api::core;
+use k8s_openapi::api::apps;
 use kube::{Api, Client, ResourceExt};
+use tracing::info;
 
 use crate::{API_VERSION, GROUP};
 
@@ -37,7 +38,7 @@ pub(crate) async fn get_primary_resource(
         sec_res: vec![],
     };
 
-    match Api::<core::v1::Pod>::namespaced(client, &namespace)
+    match Api::<apps::v1::Deployment>::namespaced(client, &namespace)
         .get(&prim_res.name)
         .await
     {
@@ -50,15 +51,18 @@ pub(crate) async fn get_primary_resource(
             }))
             .into_response()
         }
-        Err(_) => (
-            // Not 404 since that is captured by Kubernetes and transformed in:
-            // "Error from server (NotFound): the server could not find the requested resource"
-            StatusCode::UNPROCESSABLE_ENTITY,
-            format!(
-                "The resource \"{}\" in ns \"{}\" does not exist",
-                prim_res.name, namespace
-            ),
-        )
-            .into_response(),
+        Err(e) => {
+            info!("Error during request: {}", e);
+            (
+                // Not 404 since that is captured by Kubernetes and transformed in:
+                // "Error from server (NotFound): the server could not find the requested resource"
+                StatusCode::UNPROCESSABLE_ENTITY,
+                format!(
+                    "The resource \"{}\" in ns \"{}\" does not exist",
+                    prim_res.name, namespace
+                ),
+            )
+                .into_response()
+        }
     }
 }

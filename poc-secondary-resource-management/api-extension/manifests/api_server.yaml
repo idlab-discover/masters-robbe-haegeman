@@ -1,10 +1,16 @@
 ---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: api-extension
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: api-extension-multi-kinds
+  namespace: api-extension
   labels:
     app: api-extension-multi-kinds
-  name: api-extension-multi-kinds
 spec:
   replicas: 1
   selector:
@@ -15,7 +21,7 @@ spec:
       labels:
         app: api-extension-multi-kinds
     spec:
-      # serviceAccountName: api-extension-multi-kinds
+      serviceAccountName: api-extension-multi-kinds
       containers:
         - image: api-extension-multi-kinds
           imagePullPolicy: Never
@@ -28,9 +34,8 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  labels:
-    app: api-extension-multi-kinds
   name: api-extension-multi-kinds
+  namespace: api-extension
 spec:
   ports:
     - name: https
@@ -51,42 +56,39 @@ spec:
   insecureSkipTLSVerify: true
   service:
     name: api-extension-multi-kinds
-    namespace: default
+    namespace: api-extension
     port: 3000
   version: v1
   versionPriority: 15
-# ---
-# apiVersion: v1
-# kind: ServiceAccount
-# metadata:
-#   name: api-extension-multi-kinds
-#   labels:
-#     app: api-extension-multi-kinds
-# ---
-# apiVersion: rbac.authorization.k8s.io/v1
-# kind: ClusterRole
-# metadata:
-#   name: api-extension-multi-kinds
-# rules:
-#   - apiGroups:
-#       - ""
-#     resources:
-#       - pods
-#     verbs:
-#       - get
-#       - list
-#       - watch
-# ---
-# apiVersion: rbac.authorization.k8s.io/v1
-# kind: ClusterRoleBinding
-# metadata:
-#   name: api-extension-multi-kinds
-# roleRef:
-#   apiGroup: rbac.authorization.k8s.io
-#   kind: ClusterRole
-#   name: api-extension-multi-kinds
-# subjects:
-#   - apiGroup: ""
-#     kind: ServiceAccount
-#     name: api-extension-multi-kinds
-#     namespace: default
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: api-extension-multi-kinds
+  namespace: api-extension
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: api-extension-multi-kinds
+rules:
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+    verbs:
+      - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: api-extension-multi-kinds
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: api-extension-multi-kinds
+subjects:
+  - apiGroup: ""
+    kind: ServiceAccount
+    name: api-extension-multi-kinds
+    namespace: api-extension
