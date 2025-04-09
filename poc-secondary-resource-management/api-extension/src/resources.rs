@@ -2,7 +2,7 @@ use anyhow::Context;
 use axum::{Json, extract::Path};
 use kube::{
     Api, Client, Discovery, ResourceExt,
-    api::DynamicObject,
+    api::{DynamicObject, ListParams},
     discovery::{Scope, verbs},
 };
 use serde_json::Value;
@@ -41,10 +41,13 @@ pub(crate) async fn get_primary_resource(
         sec_res: vec![],
     };
 
+    const LABEL: &str = "test-label";
+
     // Source: https://github.com/kube-rs/kube/blob/d171d2620e8ad82235230fe589bbea7c9306963d/examples/dynamic_api.rs
     let client = Client::try_default()
         .await
         .context("Client Creation Error")?;
+
     let discovery = Discovery::new(client.clone())
         .run()
         .await
@@ -65,8 +68,10 @@ pub(crate) async fn get_primary_resource(
                 ar.kind
             );
 
+            let lp = ListParams::default().labels(&format!("primary_resource_label={}", LABEL));
+
             let list = api
-                .list(&Default::default())
+                .list(&lp)
                 .await
                 .with_context(|| format!("No secondary resource of kind \"{}\" found", ar.kind))?;
 
