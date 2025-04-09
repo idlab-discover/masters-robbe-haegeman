@@ -6,3 +6,4 @@ minikube start
 docker build -t api-extension-multi-kinds .
 minikube image load api-extension-multi-kinds
 kubectl apply -f ./manifests/api_server.yaml
+kubectl apply -f ./manifests/test_resource.yaml

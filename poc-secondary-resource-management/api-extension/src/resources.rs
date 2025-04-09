@@ -1,8 +1,8 @@
-use anyhow::Context;
+use anyhow::{Context, Error};
 use axum::{Json, extract::Path};
 use kube::{
     Api, Client, Discovery, ResourceExt,
-    api::{DynamicObject, ListParams},
+    api::{DynamicObject, GroupVersionKind, ListParams},
     discovery::{Scope, verbs},
 };
 use serde_json::Value;
@@ -34,20 +34,48 @@ impl MockResource {
 }
 
 pub(crate) async fn get_primary_resource(
-    Path((namespace, name)): Path<(String, String)>,
+    Path((mut group, version, kind, namespace, name)): Path<(
+        String,
+        String,
+        String,
+        String,
+        String,
+    )>,
 ) -> Result<Json<Value>> {
-    let mut prim_res = MockResource {
-        name,
-        sec_res: vec![],
-    };
-
-    const LABEL: &str = "test-label";
-
-    // Source: https://github.com/kube-rs/kube/blob/d171d2620e8ad82235230fe589bbea7c9306963d/examples/dynamic_api.rs
     let client = Client::try_default()
         .await
         .context("Client Creation Error")?;
 
+    // Source: https://github.com/kube-rs/kube/blob/d171d2620e8ad82235230fe589bbea7c9306963d/examples/dynamic_watcher.rs
+    if group == "core" {
+        group.clear();
+    }
+    let gvk = GroupVersionKind {
+        group,
+        version,
+        kind,
+    };
+    let (ar, _caps) = kube::discovery::pinned_kind(&client, &gvk)
+        .await
+        .with_context(|| format!("Failed to discover GVK {:?}", gvk))?;
+    let api: Api<DynamicObject> = Api::namespaced_with(client.clone(), &namespace, &ar);
+
+    let prim_res = api.get(&name).await.with_context(|| {
+        format!(
+            "Failed to get resource '{}' in namespace '{}' for GVK {:?}",
+            name, namespace, gvk
+        )
+    })?;
+
+    let label = prim_res
+        .metadata
+        .uid
+        .as_ref()
+        .ok_or_else(|| Error::msg("UID not found"))?;
+
+    let mut sec_res = vec![];
+
+    // Source: https://github.com/kube-rs/kube/blob/d171d2620e8ad82235230fe589bbea7c9306963d/examples/dynamic_api.rs
     let discovery = Discovery::new(client.clone())
         .run()
         .await
@@ -68,21 +96,19 @@ pub(crate) async fn get_primary_resource(
                 ar.kind
             );
 
-            let lp = ListParams::default().labels(&format!("primary_resource_label={}", LABEL));
+            let lp = ListParams::default().labels(&format!("primary_resource_label={}", label));
 
             let list = api
                 .list(&lp)
                 .await
                 .with_context(|| format!("No secondary resource of kind \"{}\" found", ar.kind))?;
 
-            prim_res.sec_res.extend(list);
+            sec_res.extend(list);
         }
     }
 
     Ok(Json(serde_json::json!({
-        "apiVersion": MockResource::api_version(),
-        "kind": MockResource::kind(),
-        "name": prim_res.name,
-        "sec_res": prim_res.sec_res.iter().map(|obj| obj.name_any()).collect::<Vec<String>>(),
+        "prim_res": prim_res,
+        "sec_res": sec_res.iter().map(|obj| obj.data.to_string()).collect::<Vec<String>>(),
     })))
 }

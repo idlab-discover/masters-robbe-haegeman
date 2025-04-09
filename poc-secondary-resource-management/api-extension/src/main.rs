@@ -16,9 +16,9 @@ use tracing_subscriber::util::SubscriberInitExt;
 mod error;
 mod resources;
 
-const GROUP: &str = "poc.sec.res.kinds";
+const GROUP: &str = "primary-all";
 const VERSION: &str = "v1";
-const API_VERSION: &str = "poc.sec.res.kinds/v1";
+const API_VERSION: &str = "primary-all/v1";
 
 #[tokio::main]
 async fn main() {
@@ -32,10 +32,11 @@ async fn main() {
         .init();
 
     let app = Router::new()
-        .route("/apis/poc.sec.res.kinds/v1/health", get(get_health))
-        .route("/apis/poc.sec.res.kinds/v1", get(get_api_resources))
+        .route("/apis/primary-all/v1/health", get(get_health))
+        .route("/apis/primary-all/v1", get(get_api_resources))
         .route(
-            "/apis/poc.sec.res.kinds/v1/namespaces/{namespace}/primary/{name}",
+            // Not following the general format to highlight kind vs. plural resource name
+            "/apis/primary-all/v1/{group}/{version}/{kind}/{namespace}/{name}",
             get(resources::get_primary_resource),
         )
         .layer(

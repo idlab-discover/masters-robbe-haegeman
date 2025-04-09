@@ -49,9 +49,9 @@ spec:
 apiVersion: apiregistration.k8s.io/v1
 kind: APIService
 metadata:
-  name: v1.poc.sec.res.kinds
+  name: v1.primary-all
 spec:
-  group: poc.sec.res.kinds
+  group: primary-all
   groupPriorityMinimum: 1000
   insecureSkipTLSVerify: true
   service:
