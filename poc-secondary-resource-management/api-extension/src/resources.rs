@@ -1,9 +1,10 @@
-use axum::{Json, extract::Path, http::StatusCode, response::IntoResponse};
+use anyhow::Context;
+use axum::{Json, extract::Path};
 use k8s_openapi::api::apps;
 use kube::{Api, Client, ResourceExt};
-use tracing::info;
+use serde_json::Value;
 
-use crate::{API_VERSION, GROUP};
+use crate::{API_VERSION, GROUP, error::Result};
 
 pub(crate) struct MockResource {
     name: String,
@@ -30,7 +31,7 @@ impl MockResource {
 
 pub(crate) async fn get_primary_resource(
     Path((namespace, name)): Path<(String, String)>,
-) -> impl IntoResponse {
+) -> Result<Json<Value>> {
     let client = Client::try_default().await.expect("Client Creation Error");
 
     let mut prim_res = MockResource {
@@ -38,31 +39,20 @@ pub(crate) async fn get_primary_resource(
         sec_res: vec![],
     };
 
-    match Api::<apps::v1::Deployment>::namespaced(client, &namespace)
+    let deploy = Api::<apps::v1::Deployment>::namespaced(client, &namespace)
         .get(&prim_res.name)
         .await
-    {
-        Ok(pod) => {
-            prim_res.sec_res.push(pod.name_any());
-            Json(serde_json::json!({
-                "apiVersion": MockResource::api_version(),
-                "kind": MockResource::kind(),
-                "sec_res": prim_res.sec_res,
-            }))
-            .into_response()
-        }
-        Err(e) => {
-            info!("Error during request: {}", e);
-            (
-                // Not 404 since that is captured by Kubernetes and transformed in:
-                // "Error from server (NotFound): the server could not find the requested resource"
-                StatusCode::UNPROCESSABLE_ENTITY,
-                format!(
-                    "The resource \"{}\" in ns \"{}\" does not exist",
-                    prim_res.name, namespace
-                ),
+        .with_context(|| {
+            format!(
+                "The resource \"{}\" in ns \"{}\" does not exist",
+                prim_res.name, namespace
             )
-                .into_response()
-        }
-    }
+        })?;
+
+    prim_res.sec_res.push(deploy.name_any());
+    Ok(Json(serde_json::json!({
+        "apiVersion": MockResource::api_version(),
+        "kind": MockResource::kind(),
+        "sec_res": prim_res.sec_res,
+    })))
 }

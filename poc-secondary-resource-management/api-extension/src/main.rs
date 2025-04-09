@@ -13,6 +13,7 @@ use tracing_subscriber::fmt;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 
+mod error;
 mod resources;
 
 const GROUP: &str = "poc.sec.res.kinds";
