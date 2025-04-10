@@ -13,7 +13,6 @@ kube-core = { version = "0.99.0", default-features = false } # For its error typ
 k8s-openapi = { version = "0.24.0", features = ["v1_31", "schemars"] }
 serde = { version = "1.0.215", features = ["derive"] }
 thiserror = "2.0.3"
-futures = "0.3.31"
 either = "1.15.0"
 async-trait = "0.1.88"
 tracing = "0.1.41"
