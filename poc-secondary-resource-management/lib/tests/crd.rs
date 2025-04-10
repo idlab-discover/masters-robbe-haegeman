@@ -1,12 +1,10 @@
 #![allow(clippy::derivable_impls)]
 
-use kube::{CustomResource, ResourceExt, api::DynamicObject, core::object::HasStatus};
+use kube::{CustomResource, api::DynamicObject, core::object::HasStatus};
 use lib::PrimaryResource;
-use lib::error::{Error, Result};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
-use tracing::info;
 
 #[derive(CustomResource, Debug, Serialize, Deserialize, Default, Clone, JsonSchema)]
 #[kube(group = "poc.sec.res", version = "v1", kind = "Database", namespaced)]
@@ -21,27 +19,14 @@ pub struct DatabaseStatus {
 }
 
 impl PrimaryResource for Database {
-    fn initialize_status(&mut self) {
-        info!("Initializing status");
-        self.status = Some(DatabaseStatus {
-            ..Default::default()
-        })
+    fn cache_secondary_status_dependent(&self) -> Option<&Vec<DynamicObject>> {
+        self.status().map(|status| &status.sec_recs)
     }
 
-    fn cache_secondary(&self) -> Result<&Vec<DynamicObject>> {
-        Ok(&self
-            .status()
-            .ok_or(Error::MissingStatusError(self.name_any()))?
-            .sec_recs)
-    }
-
-    fn cache_secondary_mut(&mut self) -> Result<&mut Vec<DynamicObject>> {
-        info!("Requesting secondary resources");
-        let name = self.name_any().clone();
-        if let Some(status) = self.status_mut() {
-            return Ok(&mut status.sec_recs);
-        }
-        Err(Error::MissingStatusError(name))
+    fn cache_secondary_mut_status_dependent(&mut self) -> Option<&mut Vec<DynamicObject>> {
+        self.status_mut()
+            .as_mut()
+            .map(|status| &mut status.sec_recs)
     }
 }
 

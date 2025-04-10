@@ -27,10 +27,37 @@ struct Response {
 // https://fasterthanli.me/articles/catching-up-with-async-rust
 // https://smallcultfollowing.com/babysteps/blog/2019/10/26/async-fn-in-traits-are-hard/
 #[async_trait]
-pub trait PrimaryResource: ResourceExt + HasStatus {
-    fn initialize_status(&mut self);
-    fn cache_secondary(&self) -> Result<&Vec<DynamicObject>>;
-    fn cache_secondary_mut(&mut self) -> Result<&mut Vec<DynamicObject>>;
+pub trait PrimaryResource: ResourceExt + HasStatus
+where
+    // Requirement for initialize_status which is used almost everywhere
+    <Self as HasStatus>::Status: Default,
+{
+    fn cache_secondary_status_dependent(&self) -> Option<&Vec<DynamicObject>>;
+    fn cache_secondary_mut_status_dependent(&mut self) -> Option<&mut Vec<DynamicObject>>;
+
+    fn initialize_status(&mut self) {
+        if self.status().is_none() {
+            *self.status_mut() = Some(<Self as HasStatus>::Status::default())
+        }
+    }
+
+    fn cache_secondary(&mut self) -> &Vec<DynamicObject> {
+        if self.status().is_none() {
+            debug!("Status was created");
+            self.initialize_status();
+        }
+        self.cache_secondary_status_dependent()
+            .expect("Should always exist since the status is initialized")
+    }
+
+    fn cache_secondary_mut(&mut self) -> &mut Vec<DynamicObject> {
+        if self.status().is_none() {
+            debug!("Status was created");
+            self.initialize_status();
+        }
+        self.cache_secondary_mut_status_dependent()
+            .expect("Should always exist since the status is initialized")
+    }
 
     async fn get_primary(&self, client: Client) -> Result<Self>
     where
@@ -57,10 +84,12 @@ pub trait PrimaryResource: ResourceExt + HasStatus {
         let mut response: Response = client.request(request).await?;
 
         let mut prim_res = response.prim_res.try_parse::<Self>().map_err(Error::from)?;
-        if prim_res.status().is_none() {
+        // Get a mutable reference to the Option value inside cache_secondary.
+        if self.status().is_none() {
             prim_res.initialize_status();
         }
-        mem::swap(&mut response.sec_res, prim_res.cache_secondary_mut()?);
+        let cache = prim_res.cache_secondary_mut();
+        mem::swap(&mut response.sec_res, cache);
 
         Ok(prim_res)
     }
@@ -145,7 +174,7 @@ pub trait PrimaryResource: ResourceExt + HasStatus {
             .await
             .map_err(Error::KubeError)?;
 
-        self.cache_secondary_mut()?.push(DynamicObject::new(
+        self.cache_secondary_mut().push(DynamicObject::new(
             &resource.name_any(),
             &ApiResource::erase::<K>(&K::DynamicType::default()),
         ));
@@ -153,7 +182,7 @@ pub trait PrimaryResource: ResourceExt + HasStatus {
         info!(
             "{}: Current secondary resources vec: {:?}",
             self.name_any(),
-            self.cache_secondary().unwrap_or(&Vec::new())
+            self.cache_secondary()
         );
 
         Ok(resource)
@@ -228,15 +257,15 @@ pub trait PrimaryResource: ResourceExt + HasStatus {
             &ApiResource::erase::<K>(&K::DynamicType::default()),
         );
 
-        let sec_resources = self.cache_secondary_mut()?;
-        let cached_resource = sec_resources
+        let cached_resource = self
+            .cache_secondary_mut()
             .iter_mut()
             .find(|cached_resource| cached_resource.name_any() == new_res.name_any());
 
         if let Some(cached_resource) = cached_resource {
             *cached_resource = res_dyn;
         } else {
-            sec_resources.push(res_dyn);
+            self.cache_secondary_mut().push(res_dyn);
         }
 
         Ok(())
@@ -246,13 +275,14 @@ pub trait PrimaryResource: ResourceExt + HasStatus {
         &mut self,
         new_res: &K,
     ) -> Result<()> {
-        let sec_resources = self.cache_secondary_mut()?;
-        let cached_resource_index = sec_resources
+        let cached_resource_index = self
+            .cache_secondary_mut()
             .iter()
             .position(|cached_resource| cached_resource.name_any() == new_res.name_any());
 
         if let Some(cached_resource_index) = cached_resource_index {
-            sec_resources.swap_remove(cached_resource_index);
+            self.cache_secondary_mut()
+                .swap_remove(cached_resource_index);
         } else {
             return Err(Error::InvalidDeleteError(new_res.name_any()));
         }
