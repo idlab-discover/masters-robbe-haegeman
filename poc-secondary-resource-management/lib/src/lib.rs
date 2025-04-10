@@ -107,8 +107,8 @@ where
         let secondary_api: Api<K> =
             Api::namespaced(client, &self.namespace().unwrap_or(String::from("default")));
 
-        let resource = secondary_api.get(name).await.map_err(Error::KubeError)?;
-        self.update_secondary_dynamic_object(&resource)?;
+        let resource = secondary_api.get(name).await.map_err(Error::from)?;
+        self.update_secondary_dynamic_object(&resource);
 
         Ok(resource)
     }
@@ -240,7 +240,7 @@ where
             .patch(name, pp, patch)
             .await
             .map_err(Error::KubeError)?;
-        self.update_secondary_dynamic_object(&resource)?;
+        self.update_secondary_dynamic_object(&resource);
 
         Ok(resource)
     }
@@ -248,8 +248,7 @@ where
     fn update_secondary_dynamic_object<K: Resource<Scope = NamespaceResourceScope>>(
         &mut self,
         new_res: &K,
-    ) -> Result<()>
-    where
+    ) where
         <K as Resource>::DynamicType: Default,
     {
         let res_dyn = DynamicObject::new(
@@ -267,8 +266,6 @@ where
         } else {
             self.cache_secondary_mut().push(res_dyn);
         }
-
-        Ok(())
     }
 
     fn delete_secondary_dynamic_object<K: Resource<Scope = NamespaceResourceScope>>(
@@ -283,11 +280,10 @@ where
         if let Some(cached_resource_index) = cached_resource_index {
             self.cache_secondary_mut()
                 .swap_remove(cached_resource_index);
+            Ok(())
         } else {
-            return Err(Error::InvalidDeleteError(new_res.name_any()));
+            Err(Error::InvalidDeleteError(new_res.name_any()))
         }
-
-        Ok(())
     }
 
     // Where clause was directly taken from [owns](https://docs.rs/kube/latest/kube/runtime/struct.Controller.html#method.owns) apart from Sync, which was required by the compiler
