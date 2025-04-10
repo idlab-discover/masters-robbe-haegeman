@@ -11,7 +11,6 @@ use tracing::info;
 #[derive(CustomResource, Debug, Serialize, Deserialize, Default, Clone, JsonSchema)]
 #[kube(group = "poc.sec.res", version = "v1", kind = "Database", namespaced)]
 #[kube(status = "DatabaseStatus", shortname = "db")]
-#[serde(rename_all = "camelCase")]
 pub struct DatabaseSpec {}
 
 #[derive(Debug, Serialize, Deserialize, Default, Clone, JsonSchema)]
