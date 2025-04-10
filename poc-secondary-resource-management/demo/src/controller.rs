@@ -12,6 +12,7 @@ use kube::{Api, runtime::controller::Action};
 use kube::{Client, ResourceExt};
 use lib::PrimaryResource;
 use lib::error::{Error, Result};
+use tracing::error;
 
 const LABEL_KUBERNETES_REPLSET: &str = "app.kubernetes.io/replset";
 const LABEL_KUBERNETES_COMPONENT: &str = "app.kubernetes.io/component";
@@ -136,7 +137,7 @@ pub async fn reconcile(g: Arc<crd::Database>, ctx: Arc<Context>) -> Result<Actio
     reconcile_sec_res::resync_backup_solution_if_needed(&db, ctx.clone()).await?;
 
     if let Err(err) = reconcile_sec_res::update_status(&db, ctx.clone()).await {
-        log::error!("Failed to update cluster status. Err: {err}");
+        error!("Failed to update cluster status. Err: {err}");
     };
 
     // rr
@@ -144,6 +145,6 @@ pub async fn reconcile(g: Arc<crd::Database>, ctx: Arc<Context>) -> Result<Actio
 }
 
 pub fn error_policy(_obj: Arc<crd::Database>, error: &Error, _ctx: Arc<Context>) -> Action {
-    log::error!("Error occurred: {error:?}");
+    error!("Error occurred: {error:?}");
     Action::await_change()
 }

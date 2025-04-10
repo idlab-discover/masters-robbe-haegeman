@@ -6,6 +6,7 @@ use lib::error::{Error, Result};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
+use tracing::info;
 
 #[derive(CustomResource, Debug, Serialize, Deserialize, Default, Clone, JsonSchema)]
 #[kube(group = "poc.sec.res", version = "v1", kind = "Database", namespaced)]
@@ -22,6 +23,7 @@ pub struct DatabaseStatus {
 
 impl PrimaryResource for Database {
     fn initialize_status(&mut self) {
+        info!("Initializing status");
         self.status = Some(DatabaseStatus {
             ..Default::default()
         })
@@ -35,7 +37,7 @@ impl PrimaryResource for Database {
     }
 
     fn cache_secondary_mut(&mut self) -> Result<&mut Vec<DynamicObject>> {
-        log::info!("Requesting secondary resources");
+        info!("Requesting secondary resources");
         let name = self.name_any().clone();
         if let Some(status) = self.status_mut() {
             return Ok(&mut status.sec_recs);

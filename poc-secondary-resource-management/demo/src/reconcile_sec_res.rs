@@ -13,6 +13,7 @@ use kube::{
     api::{ObjectMeta, Patch, PatchParams, PostParams},
     core::object::HasSpec,
 };
+use tracing::info;
 
 use crate::{
     Context,
@@ -40,7 +41,7 @@ pub async fn set_cr_version(db: &crd::Database, ctx: Arc<Context>) -> Result<()>
     );
 
     if db.spec().cr_version.is_empty() {
-        log::info!("CR version of {} will be overwritten", db.name_any());
+        info!("CR version of {} will be overwritten", db.name_any());
         let patch = serde_json::json!({
            "spec": {
                 "CRVersion": "set-cr-version"
@@ -126,7 +127,7 @@ pub async fn reconcile_user_secret(db: &mut crd::Database, ctx: Arc<Context>) ->
     let client = &ctx.client;
     let secret_name = "user-secret";
 
-    log::info!("Reconciling user-secret");
+    info!("Reconciling user-secret");
 
     let now = chrono::Local::now().to_rfc3339();
 

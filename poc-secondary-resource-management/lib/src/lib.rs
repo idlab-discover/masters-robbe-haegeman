@@ -15,6 +15,7 @@ use kube::{
 };
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use std::fmt::Debug;
+use tracing::info;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Response {
@@ -146,7 +147,7 @@ pub trait PrimaryResource: kube::ResourceExt {
             &ApiResource::erase::<K>(&K::DynamicType::default()),
         ));
 
-        log::info!(
+        info!(
             "{}: Current secondary resources vec: {:?}",
             self.name_any(),
             self.cache_secondary().unwrap_or(&Vec::new())
