@@ -7,14 +7,20 @@ use either::Either;
 use kube::{
     Api, Client, Resource, ResourceExt,
     api::{
-        ApiResource, DeleteParams, DynamicObject, ListParams, ObjectList, Patch, PatchParams,
-        PostParams,
+        ApiResource, DeleteParams, DynamicObject, GetParams, ListParams, ObjectList, Patch,
+        PatchParams, PostParams, Request,
     },
     core::Status,
     runtime::{Controller, watcher},
 };
-use serde::{Serialize, de::DeserializeOwned};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use std::fmt::Debug;
+
+#[derive(Debug, Serialize, Deserialize)]
+struct Response {
+    prim_res: DynamicObject,
+    sec_res: Vec<DynamicObject>,
+}
 
 // https://fasterthanli.me/articles/catching-up-with-async-rust
 // https://smallcultfollowing.com/babysteps/blog/2019/10/26/async-fn-in-traits-are-hard/
@@ -23,6 +29,29 @@ pub trait PrimaryResource: kube::ResourceExt {
     fn initialize_status(&mut self);
     fn cache_secondary(&self) -> Result<&Vec<DynamicObject>>;
     fn cache_secondary_mut(&mut self) -> Result<&mut Vec<DynamicObject>>;
+
+    async fn get_primary(&self, client: Client) -> Result<Self>
+    where
+        Self: DeserializeOwned,
+        <Self as kube::Resource>::DynamicType: std::default::Default,
+    {
+        let dyn_type = Self::DynamicType::default();
+        let url_path = format!(
+            "/apis/primary-all/v1/{}/{}/{}/{}/{}",
+            Self::group(&dyn_type),
+            Self::version(&dyn_type),
+            Self::kind(&dyn_type),
+            self.namespace()
+                .unwrap_or_else(|| { String::from("default") }), // Only allocate when necessary
+            self.name_any()
+        );
+        // This is also how `get` is implemented in kube.rs
+        let request_builder = Request::new(url_path);
+        let request = request_builder.get(&self.name_any(), &GetParams::default())?;
+        let response: Response = client.request(request).await?;
+
+        response.prim_res.try_parse::<Self>().map_err(|e| e.into())
+    }
 
     async fn get_secondary<
         K: kube::Resource<Scope = k8s_openapi::NamespaceResourceScope>

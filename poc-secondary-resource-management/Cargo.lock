@@ -1366,6 +1366,7 @@ dependencies = [
  "futures",
  "k8s-openapi",
  "kube",
+ "kube-core",
  "log",
  "serde",
  "thiserror 2.0.12",
