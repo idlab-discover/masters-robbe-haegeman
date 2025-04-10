@@ -15,7 +15,7 @@ use kube::{
 };
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use std::fmt::Debug;
-use tracing::info;
+use tracing::{debug, info};
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Response {
@@ -38,13 +38,17 @@ pub trait PrimaryResource: kube::ResourceExt {
     {
         let dyn_type = Self::DynamicType::default();
         let url_path = format!(
-            "/apis/primary-all/v1/{}/{}/{}/{}/{}",
+            "/apis/primary-all/v1/{}/{}/{}/{}",
             Self::group(&dyn_type),
             Self::version(&dyn_type),
             Self::kind(&dyn_type),
             self.namespace()
                 .unwrap_or_else(|| { String::from("default") }), // Only allocate when necessary
-            self.name_any()
+        );
+        debug!(
+            "Get primary ({}) from url_path: {}",
+            self.name_any(),
+            url_path
         );
         // This is also how `get` is implemented in kube.rs
         let request_builder = Request::new(url_path);
