@@ -13,7 +13,7 @@ use kube::{
     core::Status,
     runtime::{Controller, watcher},
 };
-use kube_core::object::HasStatus;
+use kube_core::{NamespaceResourceScope, object::HasStatus};
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use std::{fmt::Debug, mem};
 use tracing::{debug, info};
@@ -27,7 +27,7 @@ struct Response {
 // https://fasterthanli.me/articles/catching-up-with-async-rust
 // https://smallcultfollowing.com/babysteps/blog/2019/10/26/async-fn-in-traits-are-hard/
 #[async_trait]
-pub trait PrimaryResource: kube::ResourceExt + HasStatus {
+pub trait PrimaryResource: ResourceExt + HasStatus {
     fn initialize_status(&mut self);
     fn cache_secondary(&self) -> Result<&Vec<DynamicObject>>;
     fn cache_secondary_mut(&mut self) -> Result<&mut Vec<DynamicObject>>;
@@ -35,7 +35,7 @@ pub trait PrimaryResource: kube::ResourceExt + HasStatus {
     async fn get_primary(&self, client: Client) -> Result<Self>
     where
         Self: DeserializeOwned,
-        <Self as kube::Resource>::DynamicType: std::default::Default,
+        <Self as Resource>::DynamicType: Default,
     {
         let dyn_type = Self::DynamicType::default();
         let url_path = format!(
@@ -66,18 +66,14 @@ pub trait PrimaryResource: kube::ResourceExt + HasStatus {
     }
 
     async fn get_secondary<
-        K: kube::Resource<Scope = k8s_openapi::NamespaceResourceScope>
-            + Clone
-            + Debug
-            + Serialize
-            + DeserializeOwned,
+        K: Resource<Scope = NamespaceResourceScope> + Clone + Debug + Serialize + DeserializeOwned,
     >(
         &mut self,
         client: Client,
         name: &str,
     ) -> Result<K>
     where
-        <K as kube::Resource>::DynamicType: std::default::Default,
+        <K as Resource>::DynamicType: Default,
     {
         let secondary_api: Api<K> =
             Api::namespaced(client, &self.namespace().unwrap_or(String::from("default")));
@@ -89,18 +85,14 @@ pub trait PrimaryResource: kube::ResourceExt + HasStatus {
     }
 
     async fn list_secondary<
-        K: kube::Resource<Scope = k8s_openapi::NamespaceResourceScope>
-            + Clone
-            + Debug
-            + Serialize
-            + DeserializeOwned,
+        K: Resource<Scope = NamespaceResourceScope> + Clone + Debug + Serialize + DeserializeOwned,
     >(
         &mut self,
         client: Client,
         lp: &ListParams,
     ) -> Result<ObjectList<K>>
     where
-        <K as kube::Resource>::DynamicType: std::default::Default,
+        <K as Resource>::DynamicType: Default,
     {
         let secondary_api: Api<K> =
             Api::namespaced(client, &self.namespace().unwrap_or(String::from("default")));
@@ -115,7 +107,7 @@ pub trait PrimaryResource: kube::ResourceExt + HasStatus {
     }
 
     async fn create_secondary<
-        K: kube::Resource<Scope = k8s_openapi::NamespaceResourceScope>
+        K: Resource<Scope = NamespaceResourceScope>
             + Clone
             + Debug
             + Serialize
@@ -129,8 +121,8 @@ pub trait PrimaryResource: kube::ResourceExt + HasStatus {
         data: &mut K,
     ) -> Result<K>
     where
-        <Self as kube::Resource>::DynamicType: std::default::Default,
-        <K as kube::Resource>::DynamicType: std::default::Default,
+        <Self as Resource>::DynamicType: Default,
+        <K as Resource>::DynamicType: Default,
     {
         let owner_ref = self
             .controller_owner_ref(&Self::DynamicType::default())
@@ -168,11 +160,7 @@ pub trait PrimaryResource: kube::ResourceExt + HasStatus {
     }
 
     async fn delete_secondary<
-        K: kube::Resource<Scope = k8s_openapi::NamespaceResourceScope>
-            + Clone
-            + Debug
-            + Serialize
-            + DeserializeOwned,
+        K: Resource<Scope = NamespaceResourceScope> + Clone + Debug + Serialize + DeserializeOwned,
     >(
         &mut self,
         client: Client,
@@ -180,7 +168,7 @@ pub trait PrimaryResource: kube::ResourceExt + HasStatus {
         dp: &DeleteParams,
     ) -> Result<Either<K, Status>>
     where
-        <K as kube::Resource>::DynamicType: std::default::Default,
+        <K as Resource>::DynamicType: Default,
     {
         let secondary_api: Api<K> =
             Api::namespaced(client, &self.namespace().unwrap_or(String::from("default")));
@@ -199,7 +187,7 @@ pub trait PrimaryResource: kube::ResourceExt + HasStatus {
     }
 
     async fn patch_secondary<
-        K: kube::Resource<Scope = k8s_openapi::NamespaceResourceScope>
+        K: Resource<Scope = NamespaceResourceScope>
             + Clone
             + Debug
             + Serialize
@@ -214,7 +202,7 @@ pub trait PrimaryResource: kube::ResourceExt + HasStatus {
         patch: &Patch<K>,
     ) -> Result<K>
     where
-        <K as kube::Resource>::DynamicType: std::default::Default,
+        <K as Resource>::DynamicType: Default,
     {
         let secondary_api: Api<K> =
             Api::namespaced(client, &self.namespace().unwrap_or(String::from("default")));
@@ -228,14 +216,12 @@ pub trait PrimaryResource: kube::ResourceExt + HasStatus {
         Ok(resource)
     }
 
-    fn update_secondary_dynamic_object<
-        K: kube::Resource<Scope = k8s_openapi::NamespaceResourceScope>,
-    >(
+    fn update_secondary_dynamic_object<K: Resource<Scope = NamespaceResourceScope>>(
         &mut self,
         new_res: &K,
     ) -> Result<()>
     where
-        <K as kube::Resource>::DynamicType: std::default::Default,
+        <K as Resource>::DynamicType: Default,
     {
         let res_dyn = DynamicObject::new(
             &new_res.name_any(),
@@ -256,9 +242,7 @@ pub trait PrimaryResource: kube::ResourceExt + HasStatus {
         Ok(())
     }
 
-    fn delete_secondary_dynamic_object<
-        K: kube::Resource<Scope = k8s_openapi::NamespaceResourceScope>,
-    >(
+    fn delete_secondary_dynamic_object<K: Resource<Scope = NamespaceResourceScope>>(
         &mut self,
         new_res: &K,
     ) -> Result<()> {
@@ -278,7 +262,7 @@ pub trait PrimaryResource: kube::ResourceExt + HasStatus {
 
     // Where clause was directly taken from [owns](https://docs.rs/kube/latest/kube/runtime/struct.Controller.html#method.owns) apart from Sync, which was required by the compiler
     fn setup_watches<
-        Child: kube::Resource<Scope = k8s_openapi::NamespaceResourceScope>
+        Child: Resource<Scope = NamespaceResourceScope>
             + Clone
             + Debug
             + DeserializeOwned
