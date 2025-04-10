@@ -13,8 +13,9 @@ use kube::{
     core::Status,
     runtime::{Controller, watcher},
 };
+use kube_core::object::HasStatus;
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
-use std::fmt::Debug;
+use std::{fmt::Debug, mem};
 use tracing::{debug, info};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -26,7 +27,7 @@ struct Response {
 // https://fasterthanli.me/articles/catching-up-with-async-rust
 // https://smallcultfollowing.com/babysteps/blog/2019/10/26/async-fn-in-traits-are-hard/
 #[async_trait]
-pub trait PrimaryResource: kube::ResourceExt {
+pub trait PrimaryResource: kube::ResourceExt + HasStatus {
     fn initialize_status(&mut self);
     fn cache_secondary(&self) -> Result<&Vec<DynamicObject>>;
     fn cache_secondary_mut(&mut self) -> Result<&mut Vec<DynamicObject>>;
@@ -53,9 +54,15 @@ pub trait PrimaryResource: kube::ResourceExt {
         // This is also how `get` is implemented in kube.rs
         let request_builder = Request::new(url_path);
         let request = request_builder.get(&self.name_any(), &GetParams::default())?;
-        let response: Response = client.request(request).await?;
+        let mut response: Response = client.request(request).await?;
 
-        response.prim_res.try_parse::<Self>().map_err(|e| e.into())
+        let mut prim_res = response.prim_res.try_parse::<Self>().map_err(Error::from)?;
+        if prim_res.status().is_none() {
+            prim_res.initialize_status();
+        }
+        mem::swap(&mut response.sec_res, prim_res.cache_secondary_mut()?);
+
+        Ok(prim_res)
     }
 
     async fn get_secondary<
