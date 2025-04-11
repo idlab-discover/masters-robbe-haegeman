@@ -1,37 +1,14 @@
 use anyhow::{Context, Error};
 use axum::{Json, extract::Path};
 use kube::{
-    Api, Client, Discovery, ResourceExt,
+    Api, Client, Discovery,
     api::{DynamicObject, GroupVersionKind, ListParams},
     discovery::{Scope, verbs},
 };
 use serde_json::Value;
 use tracing::info;
 
-use crate::{API_VERSION, GROUP, error::Result};
-
-pub(crate) struct MockResource {
-    name: String,
-    sec_res: Vec<DynamicObject>,
-}
-
-impl MockResource {
-    pub(crate) fn group() -> &'static str {
-        GROUP
-    }
-
-    pub(crate) fn kind() -> &'static str {
-        "Test"
-    }
-
-    pub(crate) fn plural() -> &'static str {
-        "tests"
-    }
-
-    pub(crate) fn api_version() -> &'static str {
-        API_VERSION
-    }
-}
+use crate::error::Result;
 
 pub(crate) async fn get_primary_with_secondaries(
     Path((mut group, version, kind, namespace, name)): Path<(

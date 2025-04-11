@@ -77,7 +77,6 @@ dependencies = [
  "kube",
  "rcgen",
  "serde_json",
- "thiserror 2.0.12",
  "tokio",
  "tower",
  "tower-http",
