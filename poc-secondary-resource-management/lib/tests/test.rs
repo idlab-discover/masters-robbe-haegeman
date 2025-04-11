@@ -3,14 +3,17 @@ mod crd;
 #[cfg(test)]
 mod tests {
     use either::Either;
-    use k8s_openapi::apiextensions_apiserver::pkg::apis::apiextensions::v1::CustomResourceDefinition;
+    use k8s_openapi::{
+        ByteString, api::core::v1::Secret,
+        apiextensions_apiserver::pkg::apis::apiextensions::v1::CustomResourceDefinition,
+    };
     use kube::{
         Api, Client, CustomResourceExt, ResourceExt,
         api::{DeleteParams, PostParams},
     };
     use kube_core::ObjectMeta;
     use lib::PrimaryResource;
-    use std::sync::Once;
+    use std::{collections::BTreeMap, sync::Once};
     use tracing::{debug, info, level_filters::LevelFilter};
     use tracing_subscriber::filter::EnvFilter;
     use tracing_subscriber::util::SubscriberInitExt;
@@ -82,6 +85,25 @@ mod tests {
             .unwrap()
     }
 
+    fn get_test_secret_data() -> Secret {
+        Secret {
+            metadata: ObjectMeta {
+                name: Some(String::from("test-secret")),
+                namespace: Some(String::from("api-extension")),
+                ..Default::default()
+            },
+            data: {
+                let mut data_map = BTreeMap::new();
+                data_map.insert(
+                    String::from("test_key"),
+                    ByteString("test_value".as_bytes().to_vec()),
+                );
+                Some(data_map)
+            },
+            ..Default::default()
+        }
+    }
+
     #[test]
     fn test_initialize_status() {
         create_tracing_subscriber();
@@ -94,6 +116,29 @@ mod tests {
     }
 
     // https://kube.rs/controllers/testing/#integration-tests
+    #[tokio::test]
+    #[ignore = "uses k8s current-context"]
+    async fn test_create_secondary() {
+        create_tracing_subscriber();
+        let client = Client::try_default().await.unwrap();
+        let mut db = create_test_primary(client.clone()).await;
+
+        let mut data = get_test_secret_data();
+        let secondary = db
+            .create_secondary(client.clone(), &mut PostParams::default(), &mut data)
+            .await
+            .unwrap();
+
+        info!("{secondary:?}");
+
+        assert_eq!(
+            &db.uid().unwrap(),
+            secondary.labels().get("primary_resource_label").unwrap()
+        );
+
+        remove_test_primary(client, &db.name_any()).await;
+    }
+
     #[tokio::test]
     #[ignore = "uses k8s current-context"]
     async fn test_get_latest_with_secondaries() {
