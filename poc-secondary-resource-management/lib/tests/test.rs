@@ -3,14 +3,15 @@ mod crd;
 #[cfg(test)]
 mod tests {
     use either::Either;
+    use k8s_openapi::apiextensions_apiserver::pkg::apis::apiextensions::v1::CustomResourceDefinition;
     use kube::{
-        Api, Client, ResourceExt,
+        Api, Client, CustomResourceExt, ResourceExt,
         api::{DeleteParams, PostParams},
     };
     use kube_core::ObjectMeta;
     use lib::PrimaryResource;
     use std::sync::Once;
-    use tracing::{info, level_filters::LevelFilter};
+    use tracing::{debug, info, level_filters::LevelFilter};
     use tracing_subscriber::filter::EnvFilter;
     use tracing_subscriber::util::SubscriberInitExt;
     use tracing_subscriber::{fmt, layer::SubscriberExt};
@@ -32,7 +33,27 @@ mod tests {
         });
     }
 
+    async fn apply_database_crd() -> CustomResourceDefinition {
+        let client = Client::try_default().await.unwrap();
+
+        let crds: Api<CustomResourceDefinition> = Api::all(client.clone());
+        let crd = Database::crd();
+
+        match crds
+            .get_opt(&crd.metadata.name.clone().unwrap())
+            .await
+            .unwrap()
+        {
+            Some(crds) => crds,
+            None => {
+                debug!("Creating CRD");
+                crds.create(&PostParams::default(), &crd).await.unwrap()
+            }
+        }
+    }
+
     async fn create_test_primary(client: Client) -> Database {
+        apply_database_crd().await;
         let db = Database {
             metadata: ObjectMeta {
                 name: Some(String::from("test")),
@@ -73,7 +94,6 @@ mod tests {
     }
 
     // https://kube.rs/controllers/testing/#integration-tests
-    // Currently assumes the database resource is already created
     #[tokio::test]
     #[ignore = "uses k8s current-context"]
     async fn test_get_latest_with_secondaries() {
