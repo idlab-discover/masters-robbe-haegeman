@@ -33,7 +33,7 @@ impl MockResource {
     }
 }
 
-pub(crate) async fn get_primary_resource(
+pub(crate) async fn get_primary_with_secondaries(
     Path((mut group, version, kind, namespace, name)): Path<(
         String,
         String,

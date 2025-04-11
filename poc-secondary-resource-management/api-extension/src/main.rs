@@ -37,7 +37,7 @@ async fn main() {
         .route(
             // Not following the general format to highlight kind vs. plural resource name
             "/apis/primary-all/v1/{group}/{version}/{kind}/{namespace}/{name}",
-            get(resources::get_primary_resource),
+            get(resources::get_primary_with_secondaries),
         )
         .layer(
             ServiceBuilder::new().layer(

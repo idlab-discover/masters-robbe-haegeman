@@ -59,7 +59,7 @@ where
             .expect("Should always exist since the status is initialized")
     }
 
-    async fn get_primary(&self, client: Client) -> Result<Self>
+    async fn get_latest_with_secondaries(&self, client: Client) -> Result<Self>
     where
         Self: DeserializeOwned,
         <Self as Resource>::DynamicType: Default,

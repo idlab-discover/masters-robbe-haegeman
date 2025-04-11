@@ -46,7 +46,7 @@ mod tests {
     // Currently assumes the database resource is already created
     #[tokio::test]
     #[ignore = "uses k8s current-context"]
-    async fn get_primary() {
+    async fn test_get_latest_with_secondaries() {
         create_tracing_subscriber();
         let db = Database {
             metadata: ObjectMeta {
@@ -66,7 +66,10 @@ mod tests {
             None => db_api.create(&PostParams::default(), &db).await.unwrap(),
         };
 
-        let prim_res = existing_db.get_primary(client).await.unwrap();
+        let prim_res = existing_db
+            .get_latest_with_secondaries(client)
+            .await
+            .unwrap();
 
         info!("{prim_res:?}");
 
