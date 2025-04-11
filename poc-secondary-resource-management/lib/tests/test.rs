@@ -13,7 +13,10 @@ mod tests {
     };
     use kube_core::ObjectMeta;
     use lib::PrimaryResource;
-    use std::{collections::BTreeMap, sync::Once};
+    use std::{
+        collections::{BTreeMap, HashSet},
+        sync::Once,
+    };
     use tracing::{debug, info, level_filters::LevelFilter};
     use tracing_subscriber::filter::EnvFilter;
     use tracing_subscriber::util::SubscriberInitExt;
@@ -144,14 +147,33 @@ mod tests {
     async fn test_get_latest_with_secondaries() {
         create_tracing_subscriber();
         let client = Client::try_default().await.unwrap();
-        let db = create_test_primary(client.clone()).await;
+        let mut db = create_test_primary(client.clone()).await;
 
-        let prim_res = db
+        let secondary = db
+            .create_secondary(
+                client.clone(),
+                &mut PostParams::default(),
+                &mut get_test_secret_data(),
+            )
+            .await
+            .unwrap();
+
+        let mut prim_res = db
             .get_latest_with_secondaries(client.clone())
             .await
             .unwrap();
 
         info!("{prim_res:?}");
+
+        let db_sec_names: HashSet<_> = db.cache_secondary().iter().map(|o| o.name_any()).collect();
+        let prim_sec_names: HashSet<_> = prim_res
+            .cache_secondary()
+            .iter()
+            .map(|o| o.name_any())
+            .collect();
+
+        assert!(db_sec_names.contains(&secondary.name_any()));
+        assert_eq!(db_sec_names, prim_sec_names);
 
         remove_test_primary(client, &db.name_any()).await;
     }
