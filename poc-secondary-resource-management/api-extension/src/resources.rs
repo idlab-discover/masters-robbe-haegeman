@@ -5,10 +5,16 @@ use kube::{
     api::{DynamicObject, GroupVersionKind, ListParams},
     discovery::{Scope, verbs},
 };
-use serde_json::Value;
+use serde::Serialize;
 use tracing::info;
 
 use crate::error::Result;
+
+#[derive(Debug, Serialize)]
+pub(crate) struct PrimaryWithSecondariesResponse {
+    prim_res: DynamicObject,
+    sec_res: Vec<DynamicObject>,
+}
 
 pub(crate) async fn get_primary_with_secondaries(
     Path((mut group, version, kind, namespace, name)): Path<(
@@ -18,7 +24,7 @@ pub(crate) async fn get_primary_with_secondaries(
         String,
         String,
     )>,
-) -> Result<Json<Value>> {
+) -> Result<Json<PrimaryWithSecondariesResponse>> {
     let client = Client::try_default()
         .await
         .context("Client Creation Error")?;
@@ -84,8 +90,5 @@ pub(crate) async fn get_primary_with_secondaries(
         }
     }
 
-    Ok(Json(serde_json::json!({
-        "prim_res": prim_res,
-        "sec_res": sec_res,
-    })))
+    Ok(Json(PrimaryWithSecondariesResponse { prim_res, sec_res }))
 }
