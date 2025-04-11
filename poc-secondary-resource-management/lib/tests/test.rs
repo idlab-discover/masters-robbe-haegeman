@@ -2,6 +2,7 @@ mod crd;
 
 #[cfg(test)]
 mod tests {
+    use either::Either;
     use kube::{
         Api, Client, ResourceExt,
         api::{DeleteParams, PostParams},
@@ -31,6 +32,35 @@ mod tests {
         });
     }
 
+    async fn create_test_primary(client: Client) -> Database {
+        let db = Database {
+            metadata: ObjectMeta {
+                name: Some(String::from("test")),
+                namespace: Some(String::from("api-extension")),
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+
+        // Create an Api client for the `Database` CRD
+        let db_api: Api<Database> = Api::namespaced(client.clone(), "api-extension");
+        match db_api.get_opt(&db.name_any()).await.unwrap() {
+            Some(db) => db,
+            None => db_api.create(&PostParams::default(), &db).await.unwrap(),
+        }
+    }
+
+    async fn remove_test_primary(
+        client: Client,
+        db_name: &str,
+    ) -> Either<Database, kube_core::Status> {
+        let db_api: Api<Database> = Api::namespaced(client.clone(), "api-extension");
+        db_api
+            .delete(db_name, &DeleteParams::default())
+            .await
+            .unwrap()
+    }
+
     #[test]
     fn test_initialize_status() {
         create_tracing_subscriber();
@@ -48,34 +78,16 @@ mod tests {
     #[ignore = "uses k8s current-context"]
     async fn test_get_latest_with_secondaries() {
         create_tracing_subscriber();
-        let db = Database {
-            metadata: ObjectMeta {
-                name: Some(String::from("test")),
-                namespace: Some(String::from("api-extension")),
-                ..Default::default()
-            },
-            ..Default::default()
-        };
-
         let client = Client::try_default().await.unwrap();
+        let db = create_test_primary(client.clone()).await;
 
-        // Create an Api client for the `Database` CRD
-        let db_api: Api<Database> = Api::namespaced(client.clone(), "api-extension");
-        let existing_db = match db_api.get_opt(&db.name_any()).await.unwrap() {
-            Some(db) => db,
-            None => db_api.create(&PostParams::default(), &db).await.unwrap(),
-        };
-
-        let prim_res = existing_db
-            .get_latest_with_secondaries(client)
+        let prim_res = db
+            .get_latest_with_secondaries(client.clone())
             .await
             .unwrap();
 
         info!("{prim_res:?}");
 
-        db_api
-            .delete(&existing_db.name_any(), &DeleteParams::default())
-            .await
-            .unwrap();
+        remove_test_primary(client, &db.name_any()).await;
     }
 }
