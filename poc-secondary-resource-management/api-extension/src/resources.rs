@@ -86,6 +86,6 @@ pub(crate) async fn get_primary_with_secondaries(
 
     Ok(Json(serde_json::json!({
         "prim_res": prim_res,
-        "sec_res": sec_res.iter().map(|obj| obj.data.to_string()).collect::<Vec<String>>(),
+        "sec_res": sec_res,
     })))
 }
