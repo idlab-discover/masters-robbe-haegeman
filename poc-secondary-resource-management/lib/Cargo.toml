@@ -23,5 +23,5 @@ tracing = "0.1.41"
 rustls = "0.23.26" # Was required to avoid "no process-level CryptoProvider available -- call CryptoProvider::install_default() before this point"
 schemars = "0.8.21"
 serde_json = "1.0.133"
-tokio = { version = "1.44.2", features = ["full"] }
+tokio = { version = "1.45.0", features = ["full"] }
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
