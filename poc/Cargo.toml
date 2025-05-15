@@ -1,3 +1,3 @@
 [workspace]
-members = ["api-extension", "demo-controller", "kube-primary"]
+members = ["primary-aggregator-api", "demo-controller", "kube-primary"]
 resolver = "2"

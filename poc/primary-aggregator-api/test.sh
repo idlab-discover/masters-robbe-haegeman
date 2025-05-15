@@ -1,9 +1,9 @@
 minikube delete
 # kubectl delete -f ./manifests/api_server.yaml
-# minikube image rm api-extension-multi-kinds
+# minikube image rm primary-aggregator-api
 
 minikube start
-docker build -t api-extension-multi-kinds .
-minikube image load api-extension-multi-kinds
+docker build -t primary-aggregator-api .
+minikube image load primary-aggregator-api
 kubectl apply -f ./manifests/api_server.yaml
 kubectl apply -f ./manifests/test_resource.yaml

@@ -7,7 +7,7 @@ COPY . .
 RUN cargo install --path .
 
 FROM debian:bookworm-slim
-COPY --from=builder /usr/local/cargo/bin/api-extension /usr/local/bin/api-extension
+COPY --from=builder /usr/local/cargo/bin/primary-aggregator-api /usr/local/bin/primary-aggregator-api
 
 
-CMD ["api-extension"]
+CMD ["primary-aggregator-api"]

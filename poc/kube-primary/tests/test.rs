@@ -63,14 +63,14 @@ mod tests {
         let db = Database {
             metadata: ObjectMeta {
                 name: Some(String::from("test")),
-                namespace: Some(String::from("api-extension")),
+                namespace: Some(String::from("poc-testing")),
                 ..Default::default()
             },
             ..Default::default()
         };
 
         // Create an Api client for the `Database` CRD
-        let db_api: Api<Database> = Api::namespaced(client.clone(), "api-extension");
+        let db_api: Api<Database> = Api::namespaced(client.clone(), "poc-testing");
         match db_api.get_opt(&db.name_any()).await.unwrap() {
             Some(db) => db,
             None => db_api.create(&PostParams::default(), &db).await.unwrap(),
@@ -81,7 +81,7 @@ mod tests {
         client: Client,
         db_name: &str,
     ) -> Either<Database, kube_core::Status> {
-        let db_api: Api<Database> = Api::namespaced(client.clone(), "api-extension");
+        let db_api: Api<Database> = Api::namespaced(client.clone(), "poc-testing");
         db_api
             .delete(db_name, &DeleteParams::default())
             .await
@@ -92,7 +92,7 @@ mod tests {
         Secret {
             metadata: ObjectMeta {
                 name: Some(String::from("test-secret")),
-                namespace: Some(String::from("api-extension")),
+                namespace: Some(String::from("poc-testing")),
                 ..Default::default()
             },
             data: {

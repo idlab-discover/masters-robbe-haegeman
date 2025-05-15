@@ -10,9 +10,9 @@ Please read [API extension server](../../thesis_resources/findings/api_extension
 **Setup**
 
 ```sh
-docker build -t api-extension-multi-kinds .
+docker build -t primary-aggregator-api .
 minikube start
-minikube image load api-extension-multi-kinds
+minikube image load primary-aggregator-api
 kubectl apply -f ./manifests/api_server.yaml
 ```
 
@@ -21,6 +21,6 @@ kubectl apply -f ./manifests/api_server.yaml
 ```sh
 kubectl describe apiservice v1.poc.sec.res.kinds
 kubectl get --raw /apis/poc.sec.res.kinds/v1/health
-kubectl get pods -l app=api-extension-multi-kinds
-kubectl rollout restart deployment -n default api-extension-multi-kinds # Doesn't work since we have to set `imagePullPolicy: Never`
+kubectl get pods -l app=primary-aggregator-api
+kubectl rollout restart deployment -n default primary-aggregator-api # Doesn't work since we have to set `imagePullPolicy: Never`
 ```

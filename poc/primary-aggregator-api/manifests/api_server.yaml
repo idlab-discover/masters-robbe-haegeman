@@ -2,30 +2,30 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: api-extension
+  name: poc-testing
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: api-extension-multi-kinds
-  namespace: api-extension
+  name: primary-aggregator-api
+  namespace: poc-testing
   labels:
-    app: api-extension-multi-kinds
+    app: primary-aggregator-api
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: api-extension-multi-kinds
+      app: primary-aggregator-api
   template:
     metadata:
       labels:
-        app: api-extension-multi-kinds
+        app: primary-aggregator-api
     spec:
-      serviceAccountName: api-extension-multi-kinds
+      serviceAccountName: primary-aggregator-api
       containers:
-        - image: api-extension-multi-kinds
+        - image: primary-aggregator-api
           imagePullPolicy: Never
-          name: api-extension-multi-kinds
+          name: primary-aggregator-api
           ports:
             - containerPort: 3000
               name: https
@@ -34,8 +34,8 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: api-extension-multi-kinds
-  namespace: api-extension
+  name: primary-aggregator-api
+  namespace: poc-testing
 spec:
   ports:
     - name: https
@@ -43,7 +43,7 @@ spec:
       protocol: TCP
       targetPort: https
   selector:
-    app: api-extension-multi-kinds
+    app: primary-aggregator-api
   type: ClusterIP
 ---
 apiVersion: apiregistration.k8s.io/v1
@@ -55,8 +55,8 @@ spec:
   groupPriorityMinimum: 1000
   insecureSkipTLSVerify: true
   service:
-    name: api-extension-multi-kinds
-    namespace: api-extension
+    name: primary-aggregator-api
+    namespace: poc-testing
     port: 3000
   version: v1
   versionPriority: 15
@@ -64,13 +64,13 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: api-extension-multi-kinds
-  namespace: api-extension
+  name: primary-aggregator-api
+  namespace: poc-testing
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: api-extension-multi-kinds
+  name: primary-aggregator-api
 rules:
   - apiGroups:
       - "*"
@@ -83,13 +83,13 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: api-extension-multi-kinds
+  name: primary-aggregator-api
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: api-extension-multi-kinds
+  name: primary-aggregator-api
 subjects:
   - apiGroup: ""
     kind: ServiceAccount
-    name: api-extension-multi-kinds
-    namespace: api-extension
+    name: primary-aggregator-api
+    namespace: poc-testing
