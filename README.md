@@ -70,7 +70,7 @@ All information is included in this repository. Everything relevant to the proto
 +-- 📂operators                                     # Kubernetes operators created during learning.
 |   +-- 📂kube-rs-building-cronjob                  # Naive translation of Kubebuilder tutorial to Kube.rs.
 |   +-- 📂kubebuilder-building-cronjob              # Kubebuilder tutorial: "Building cronjob".
-+-- 📂poc            # Proof-of-concept: both library and testing grounds.
++-- 📂poc                                           # Proof-of-concept: both library and testing grounds.
 +-- 📂thesis_resources                              # Resources and documentation specific to the thesis project.
 |   +-- 📂findings                                  # Detailed research findings and analyses from the project.
 |   +-- 📂meeting_notes                             # Summaries from bi-weekly thesis meetings.
