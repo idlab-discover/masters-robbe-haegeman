@@ -9,11 +9,11 @@ on:
   push:
     branches: [main]
     paths:
-      - operators/kube-rs-building-cronjob/**
+      - experiments/cronjob-tutorial/kube-rs/**
       - poc/**
   pull_request:
     paths:
-      - operators/kube-rs-building-cronjob/**
+      - experiments/cronjob-tutorial/kube-rs/**
       - poc/**
   schedule:
     - cron: "7 7 * * 1"
@@ -26,7 +26,7 @@ jobs:
     strategy:
       matrix:
         directory:
-          - operators/kube-rs-building-cronjob
+          - experiments/cronjob-tutorial/kube-rs
           - poc
     uses: ./.github/workflows/scheduled.yml
     with:

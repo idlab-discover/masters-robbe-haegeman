@@ -50,7 +50,7 @@ act -j <JOB> --env INPUT_DIRECTORY="<DIR>" --env INPUT_MSRV="1.56.1"    # Run a 
 ```
 
 TODO: check if it should always by a relative path
-An example of `<DIR>` would be: "./operators/kube-rs-building-cronjob"
+An example of `<DIR>` would be: "./experiments/cronjob-tutorial/kube-rs"
 
 > [!NOTE]
 > `-b` does the same as `--env` but doesn't allow multiple

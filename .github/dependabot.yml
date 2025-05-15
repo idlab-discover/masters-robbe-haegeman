@@ -5,7 +5,7 @@ updates:
     schedule:
       interval: weekly
   - package-ecosystem: cargo
-    directory: /operators/kube-rs-building-cronjob
+    directory: /experiments/cronjob-tutorial/kube-rs
     schedule:
       interval: weekly
   - package-ecosystem: cargo
