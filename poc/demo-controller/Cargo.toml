@@ -1,5 +1,5 @@
 [package]
-name = "demo"
+name = "demo-controller"
 version = "0.1.0"
 edition = "2024"
 
