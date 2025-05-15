@@ -10,8 +10,8 @@ use kube::core::object::HasSpec;
 use kube::runtime::{Controller, watcher};
 use kube::{Api, runtime::controller::Action};
 use kube::{Client, ResourceExt};
-use lib::PrimaryResource;
-use lib::error::{Error, Result};
+use kube_primary::PrimaryResource;
+use kube_primary::error::{Error, Result};
 use tracing::error;
 
 const LABEL_KUBERNETES_REPLSET: &str = "app.kubernetes.io/replset";

@@ -14,7 +14,7 @@ name = "crdgen"
 path = "src/crdgen.rs"
 
 [dependencies]
-lib = { path = "../lib" }
+kube-primary = { path = "../kube-primary" }
 kube = { version = "0.99.0", default-features = false, features = [
     "client",
     "derive",

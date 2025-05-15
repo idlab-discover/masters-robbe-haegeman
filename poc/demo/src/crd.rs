@@ -1,5 +1,5 @@
-use kube::{CustomResource, api::DynamicObject, core::object::HasStatus};
-use lib::PrimaryResource;
+use kube::{api::DynamicObject, core::object::HasStatus, CustomResource};
+use kube_primary::PrimaryResource;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
