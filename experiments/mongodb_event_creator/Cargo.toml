@@ -1,5 +1,5 @@
 [package]
-name = "percona_mongodb_event_creator"
+name = "mongodb_event_creator"
 version = "0.1.0"
 edition = "2021"
 
