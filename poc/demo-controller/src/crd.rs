@@ -1,5 +1,5 @@
-use kube::{api::DynamicObject, core::object::HasStatus, CustomResource};
-use kube_primary::PrimaryResource;
+use kube::{CustomResource, api::DynamicObject, core::object::HasStatus};
+use kube_primary::PrimaryResourceExt;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
@@ -23,7 +23,7 @@ pub struct DatabaseStatus {
     pub sec_recs: Vec<DynamicObject>,
 }
 
-impl PrimaryResource for Database {
+impl PrimaryResourceExt for Database {
     fn cache_secondary_status_dependent(&self) -> Option<&Vec<DynamicObject>> {
         self.status().map(|status| &status.sec_recs)
     }

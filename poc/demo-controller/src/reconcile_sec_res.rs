@@ -20,7 +20,7 @@ use crate::{
     crd::{self},
 };
 
-use kube_primary::{PrimaryResource, error::Result};
+use kube_primary::{PrimaryResourceExt, error::Result};
 
 // Placeholder for the real struct
 pub struct ReplsetSpec {

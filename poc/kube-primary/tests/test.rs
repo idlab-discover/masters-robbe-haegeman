@@ -12,7 +12,7 @@ mod tests {
         api::{DeleteParams, PostParams},
     };
     use kube_core::ObjectMeta;
-    use kube_primary::PrimaryResource;
+    use kube_primary::PrimaryResourceExt;
     use std::{
         collections::{BTreeMap, HashSet},
         sync::Once,

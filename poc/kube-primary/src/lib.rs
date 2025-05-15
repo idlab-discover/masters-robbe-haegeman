@@ -27,7 +27,7 @@ struct Response {
 // https://fasterthanli.me/articles/catching-up-with-async-rust
 // https://smallcultfollowing.com/babysteps/blog/2019/10/26/async-fn-in-traits-are-hard/
 #[async_trait]
-pub trait PrimaryResource: ResourceExt + HasStatus
+pub trait PrimaryResourceExt: ResourceExt + HasStatus
 where
     // Requirement for initialize_status which is used almost everywhere
     <Self as HasStatus>::Status: Default,
