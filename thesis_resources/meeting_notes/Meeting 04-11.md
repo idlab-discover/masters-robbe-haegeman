@@ -5,7 +5,7 @@
 ### Current progress
 
 - Multiple kinds
-  - API extension server
+  - Extension API server
     - Get primary resource route at: `/apis/primary-all/v1/{group}/{version}/{kind}/{namespace}/{name}`
       - Uses discovery API for fetching `APIResource` level of information
       - Uses discovery to get all possible `APIResource`s which are present
@@ -81,7 +81,7 @@ Keep the amount of boilerplate in each of the tests high:
 
 The name `get_primary()` is not very clear; maybe something like `get_latest_with_secondaries()` is more representative.
 
-### API extension server
+### Extension API server
 
 Good way of implementing it;
 Register route wouldn't be the way to go, maybe the extension server can figure it out through the other requests made?

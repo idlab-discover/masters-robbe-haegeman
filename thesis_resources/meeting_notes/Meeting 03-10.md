@@ -27,7 +27,7 @@
 - How would we implement fetching multiple kinds?
   - (bold is personal preference)
   - We can either request from `etcd` directly or go **through the API servers**
-  - We can add this functionality through the WASM parent operator or an **API extension server**
+  - We can add this functionality through the WASM parent operator or an **extension API server**
   - Do these get transformed into Rust types or as DynamicObjects?
 - How would we implement the separate reconcile functions?
 
@@ -68,7 +68,7 @@ The end solution is never as efficient as a centralized one, due to the complexi
 #### Feedback on ideas surrounding implementation
 
 - Through the **API servers**
-- Through **API extension server**
+- Through **extension API server**
 - Attempt to use Rust types, but if out of scope, just go back to DynamicObjects
 
 ### How should I implement the other `..._secondary` calls?

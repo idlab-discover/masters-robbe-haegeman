@@ -1,4 +1,4 @@
-# API extension server
+# Extension API server
 
 Required due to [not being available natively](./fetching_multiple_kinds.md)
 Discussed in [Meeting 10/03/25](../meeting_notes/Meeting%2003-10.md)

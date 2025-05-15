@@ -104,11 +104,11 @@
 
 - Proposal structure:
   - Left side: patched version of Kube.rs with client
-  - Connected to API extension server
+  - Connected to extension API server
   - With the extension server connected to API server
 - The diagram would make it so the section would thus be repeats of what can be seen in the diagram
 - Use the structure of *"we had this problem and we have solved it this way"*
-  - This is e.g. missing from the API extension server chapter, since why do we use an API extension server?
+  - This is e.g. missing from the extension API server chapter, since why do we use an extension API server?
 - The chapters currently aren't very connected
 
 ### Implementation

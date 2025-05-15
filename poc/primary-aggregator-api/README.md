@@ -1,9 +1,6 @@
-# API extension server
+# Extension API server
 
-Currently, this is part of the example operator by [Metalbear](https://metalbear.co/blog/writing-a-kubernetes-operator/).
-This is however temporary and is used to create a correct setup within a cluster first.
-
-Please read [API extension server](../../thesis_resources/findings/api_extension_server.md) for more info
+Please read [extension API server](../../thesis_resources/findings/extension_api_server.md) for more info
 
 ## Instructions for testing
 
