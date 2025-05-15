@@ -134,6 +134,8 @@ jobs:
       # intentionally no target specifier; see https://github.com/jonhoo/rust-ci-conf/pull/4
       # --feature-powerset runs for every combination of features
       - name: cargo hack
+        env:
+          K8S_OPENAPI_ENABLED_VERSION: 1.31
         run: cargo hack --feature-powerset check
   msrv:
     # check that we can build using the minimal rust version that is specified by this crate
