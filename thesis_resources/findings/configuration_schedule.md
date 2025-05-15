@@ -41,7 +41,7 @@ As is visible from the explanation: it is not recommended to use this value in o
 
 ### Reconcile again after X time
 
-[Kubebuilder book: Reconcilation process](https://book.kubebuilder.io/getting-started.html?highlight=reconcile#reconciliation-process)
+[Kubebuilder book: Reconciliation process](https://book.kubebuilder.io/getting-started.html?highlight=reconcile#reconciliation-process)
 
 > Reconcile again after X time:
 >

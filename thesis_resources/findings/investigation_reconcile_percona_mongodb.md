@@ -1,4 +1,4 @@
-# Notes - Investigation scheduled reconcilation in the Percona MongoDB operator
+# Notes - Investigation scheduled reconciliation in the Percona MongoDB operator
 
 The following documentation is specifically about the**Percona MongoDB operator**.  
 I will however often refer to it as the *Percona operator* or even just *"the operator"*, since the architecture of the Percona database operators are very similar (and it makes typing easier).
@@ -56,7 +56,7 @@ We however can find 2 other cases within the code where the RequeueAfter flag is
 
 ### Kubebuilder book
 
-Looking at the reasons highlighted in ["Why should you use it (scheduled reconcilation) and why not?"](./configuration_schedule.md#why-should-you-use-it-and-why-not), we can not link the current operator to this group:
+Looking at the reasons highlighted in ["Why should you use it (scheduled reconciliation) and why not?"](./configuration_schedule.md#why-should-you-use-it-and-why-not), we can not link the current operator to this group:
 
 - **Observing External Systems:** the operator is heavily integrated and creates events for the proper situations
 - **Time-Based Operations:** only things that come to mind are certificate renewals or backups, but these wouldn't have to happen every 5s by default

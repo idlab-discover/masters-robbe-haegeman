@@ -17,9 +17,9 @@ It builds on the prior work of Ramlot T. ([Github repo](https://github.com/thesi
 
 During the development of Van Landuyt's solution, problematic behavior was highlighted in the used operators, where the operators would wake-up in a set interval (this through analysis of the [Percona MongoDB Operator](https://github.com/percona/percona-server-mongodb-operator)).
 This is problematic for the WASM prototype, since unloading is used to minimize the operator footprint.
-Minimizing the number of wake-ups (i.e. calling the reconcilation function), increases the efficiency of the solution.
+Minimizing the number of wake-ups (i.e. calling the reconciliation function), increases the efficiency of the solution.
 
-### "Accepted" reasons to use scheduled reconcilation
+### "Accepted" reasons to use scheduled reconciliation
 
 From [Kubebuilder book: Why not use RequeueAfter X for all scenarios instead of watching resources?](https://book.kubebuilder.io/reference/watching-resources.html?highlight=period#why-not-use-requeueafter-x-for-all-scenarios-instead-of-watching-resources):
 > While RequeueAfter is not the primary method for triggering reconciliations, there are specific cases where it is necessary, such as:
@@ -91,8 +91,8 @@ All information is included in this repository. Everything relevant to the proto
 | 27/09 - 07/10 | <ul><li>Go through previous master theses</li><li>Research what operators do when activated</li><li>Investigate how events work on client and server side and why these aren't enough for the WASM-operator</li></ul> |
 | 07/10 - 21/10 | <ul><li>Analyze Van Landuyt's K.'s operators for the wake-up behavior by investigating the code and traces</li></ul> |
 | 21/10 - 04/11 | <ul><li>Analyze Van Landuyt's K.'s operators for the wake-up behavior by investigating the code and traces</li><li>Compare the operator(/controller) architecture from Kubebuilder with kube.rs</li></ul> |
-| 04/11 - 18/11 | <ul><li>Compare the operator(/controller) architecture from Kubebuilder with kube.rs</li><li>Investigate how scheduled reconcilation is implemented and why</li></ul> |
-| 18/11 - 02/12 | <ul><li>Run the WASM-prototype locally and investigate further</li><li>Find which parts of the Percona MongoDB operator enforce the use of scheduled reconcilation</li><li>Continue learning Kube.rs</li></ul> |
+| 04/11 - 18/11 | <ul><li>Compare the operator(/controller) architecture from Kubebuilder with kube.rs</li><li>Investigate how scheduled reconciliation is implemented and why</li></ul> |
+| 18/11 - 02/12 | <ul><li>Run the WASM-prototype locally and investigate further</li><li>Find which parts of the Percona MongoDB operator enforce the use of scheduled reconciliation</li><li>Continue learning Kube.rs</li></ul> |
 | 02/12 - 11/12 | <ul><li>Work toward prototype solution</li><li>Work on presentation</li><li>Create first draft of thesis</li></ul> |
 | 11/12 - 19/12 | <ul><li>Implement automatic watches in PoC</li><li>Implement feedback presentation</li><li>Create first draft of thesis</li></ul> |
 

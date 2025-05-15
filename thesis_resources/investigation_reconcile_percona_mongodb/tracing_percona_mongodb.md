@@ -52,7 +52,7 @@ mongosh "mongodb://databaseAdmin:databaseAdminPassword@minimal-cluster-mongos.<n
 
 ## Adding modifications
 
-### Location of the reconcilation function
+### Location of the reconciliation function
 
 This was not in the position where it resides by default in a Kubebuilder project.
 
