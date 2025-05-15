@@ -24,12 +24,12 @@
       - Other run script is '(old)'
     - Often good code documentation
 - Upgrade / update [mongodbSpammer](https://github.com/idlab-discover/wasm-operator/tree/main/controllers/mongodbSpammer) in order to verify proper behavior of the Percona operator
-- Further research in the need of scheduled reconcilation for the Percona MongoDB operator
+- Further research in the need of scheduled reconciliation for the Percona MongoDB operator
   - See [the findings file on the topic](../findings/investigation_reconcile_percona_mongodb.md)
 
 ### Subjects to discuss
 
-- Investigation of the scheduled reconcilation
+- Investigation of the scheduled reconciliation
   - End conclusion: the operator currently doesn't watch all resources controlled by the CR
     - It only manages the primary resources, not the secondary resources
     - Multiple PR's created to fix the issue [PR: 880](https://github.com/percona/percona-server-mongodb-operator/pull/880), [PR: 1068](https://github.com/percona/percona-server-mongodb-operator/pull/1068)
@@ -89,7 +89,7 @@ Document the dev environment used (in this case, that would be using `clippy` on
 Making the application easier to use / setup is definitely important in the project
 Could be part of the reason that there is a lot of interest, but not a lot of people using it / further developing the prototype.
 
-### Investigation of the scheduled reconcilation
+### Investigation of the scheduled reconciliation
 
 Secondary resources seems to be a proper conclusion.
 The sidecar containers are also interesting, but not the main focus here.

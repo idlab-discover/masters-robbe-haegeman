@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: test-res
-  namespace: api-extension
-  labels:
-    primary_resource_label: test-label
-data:
-  test-data: test

@@ -1,0 +1,95 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: poc-testing
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: primary-aggregator-api
+  namespace: poc-testing
+  labels:
+    app: primary-aggregator-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: primary-aggregator-api
+  template:
+    metadata:
+      labels:
+        app: primary-aggregator-api
+    spec:
+      serviceAccountName: primary-aggregator-api
+      containers:
+        - image: primary-aggregator-api
+          imagePullPolicy: Never
+          name: primary-aggregator-api
+          ports:
+            - containerPort: 3000
+              name: https
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: primary-aggregator-api
+  namespace: poc-testing
+spec:
+  ports:
+    - name: https
+      port: 3000
+      protocol: TCP
+      targetPort: https
+  selector:
+    app: primary-aggregator-api
+  type: ClusterIP
+---
+apiVersion: apiregistration.k8s.io/v1
+kind: APIService
+metadata:
+  name: v1.primary-all
+spec:
+  group: primary-all
+  groupPriorityMinimum: 1000
+  insecureSkipTLSVerify: true
+  service:
+    name: primary-aggregator-api
+    namespace: poc-testing
+    port: 3000
+  version: v1
+  versionPriority: 15
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: primary-aggregator-api
+  namespace: poc-testing
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: primary-aggregator-api
+rules:
+  - apiGroups:
+      - "*"
+    resources:
+      - "*"
+    verbs:
+      - list
+      - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: primary-aggregator-api
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: primary-aggregator-api
+subjects:
+  - apiGroup: ""
+    kind: ServiceAccount
+    name: primary-aggregator-api
+    namespace: poc-testing

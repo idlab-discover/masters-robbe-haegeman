@@ -111,7 +111,7 @@ If we notice when it is finished, that the section is misplaced, then we can alw
 - Be very explicit on **what** you want to achieve
   - e.g. The point of this change is to make it easy to...
 - Give an overview of how the entire system operates (non-specific)
-  - e.g. the SDK connects to the API extension server, with a drawing, making it very clear about what this is (control plane, sdk of operator...)
+  - e.g. the SDK connects to the extension API server, with a drawing, making it very clear about what this is (control plane, sdk of operator...)
 
 It should be possible for someone else to take the architecture and implement it in their own, other way.
 There is no reason why it wouldn't be possible to implement the extension server + SDK in Go for example.

@@ -1,3 +1,0 @@
-[workspace]
-members = [ "api-extension","demo", "lib"]
-resolver = "2"

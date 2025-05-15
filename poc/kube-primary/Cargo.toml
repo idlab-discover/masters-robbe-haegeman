@@ -1,0 +1,24 @@
+[package]
+name = "kube-primary"
+version = "0.1.0"
+license.workspace = true
+repository.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+async-trait.workspace = true
+either.workspace = true
+k8s-openapi.workspace = true
+kube = { workspace = true, features = ["derive", "runtime"] }
+kube-core.workspace = true                                    # For its error types
+serde = { workspace = true, features = ["derive"] }
+thiserror.workspace = true
+tracing.workspace = true
+
+[dev-dependencies]
+k8s-openapi = { workspace = true, features = ["v1_31", "schemars"] }
+schemars.workspace = true
+serde_json.workspace = true
+tokio = { workspace = true, features = ["full"] }
+tracing-subscriber = { workspace = true, features = ["env-filter"] }

@@ -9,12 +9,12 @@ on:
   push:
     branches: [main]
     paths:
-      - operators/kube-rs-building-cronjob/**
-      - poc-secondary-resource-management/**
+      - experiments/cronjob-tutorial/kube-rs/**
+      - poc/**
   pull_request:
     paths:
-      - operators/kube-rs-building-cronjob/**
-      - poc-secondary-resource-management/**
+      - experiments/cronjob-tutorial/kube-rs/**
+      - poc/**
   schedule:
     - cron: "7 7 * * 1"
 concurrency:
@@ -26,8 +26,8 @@ jobs:
     strategy:
       matrix:
         directory:
-          - operators/kube-rs-building-cronjob
-          - poc-secondary-resource-management
+          - experiments/cronjob-tutorial/kube-rs
+          - poc
     uses: ./.github/workflows/scheduled.yml
     with:
       directory: ${{ matrix.directory }}

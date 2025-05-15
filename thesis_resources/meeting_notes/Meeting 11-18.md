@@ -10,8 +10,8 @@
   - information on operators for testing
   - planning
   - sources
-- Found code responsible for scheduled reconcilation in Percona MongoDB ([link](../findings/investigation_reconcile_percona_mongodb.md))
-- Further research into how scheduled reconcilation is implemented and why you should or should not use it ([link](../findings/configuration_schedule.md))
+- Found code responsible for scheduled reconciliation in Percona MongoDB ([link](../findings/investigation_reconcile_percona_mongodb.md))
+- Further research into how scheduled reconciliation is implemented and why you should or should not use it ([link](../findings/configuration_schedule.md))
 - Further research into the architecture of Kube.rs operators and how they compare to the visualization from Kubebuilder
 - (Further progress in following Kube.rs guides and reading the "Kubernetes in Action" book)
 
@@ -35,7 +35,7 @@
 
 ### Feedback current progress + next steps
 
-The current research was very focussed on how reconcilation happens (which is a good thing), but try to find out what specifically these operators due during such a scheduled reconcile.
+The current research was very focussed on how reconciliation happens (which is a good thing), but try to find out what specifically these operators due during such a scheduled reconcile.
 
 - What happens during the reconcile that isn't event based (i.e. what isn't watch/event based)
 - What stops working inside the operator if the schedule is removed
@@ -52,7 +52,7 @@ They also agreed that the use of comments within the operator can help with clar
 
 ### Next on the agenda
 
-Seem to agree, but now analyzing the specific pain points causing the requirement for scheduled reconcilation is a priority.
+Seem to agree, but now analyzing the specific pain points causing the requirement for scheduled reconciliation is a priority.
 
 ### Mailing the progress
 

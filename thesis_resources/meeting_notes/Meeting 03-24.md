@@ -15,8 +15,8 @@
       - Async traits are a very hard topic[^1][^2] -> likely take a while to stabilize
       - Gives us [*"`dyn` compatibility"*](https://doc.rust-lang.org/reference/items/traits.html#r-items.traits.dyn-compatible.async-traits) (formerly known as "object safety")
     - If later no longer required, easy to remove
-- Work on API extension server
-  - [More in depth writings](../findings/api_extension_server.md)
+- Work on extension API server
+  - [More in depth writings](../findings/extension_api_server.md)
   - Docker image (based on Debian-slim due to advice against Alpine)
   - HTTPS required
     - Use of self signed certificates
