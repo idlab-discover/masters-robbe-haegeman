@@ -24,8 +24,8 @@ use kube_primary::{PrimaryResourceExt, error::Result};
 
 // Placeholder for the real struct
 pub struct ReplsetSpec {
-    pub name: String,
-    pub size: i32,
+    pub _name: String,
+    pub _size: i32,
 }
 
 /// Sets the CR version if it is not set
@@ -70,7 +70,7 @@ pub async fn check_n_set_defaults(_db: &crd::Database, _ctx: Arc<Context>) -> Re
 
 /// Built in function from Kubebuilder
 /// Kube.rs supports Add and remove functions instead
-pub async fn set_finalizers(_db: &crd::Database, _ctx: Arc<Context>) -> Result<()> {
+pub async fn _set_finalizers(_db: &crd::Database, _ctx: Arc<Context>) -> Result<()> {
     Ok(())
 }
 

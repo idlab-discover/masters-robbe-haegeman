@@ -1,7 +1,11 @@
 [package]
 name = "demo-controller"
 version = "0.1.0"
-edition = "2024"
+license.workspace = true
+repository.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
 
 [[bin]]
 doc = false
@@ -15,17 +19,14 @@ path = "src/crdgen.rs"
 
 [dependencies]
 kube-primary = { path = "../kube-primary" }
-kube = { version = "0.99.0", default-features = false, features = [
-    "client",
-    "derive",
-] }
-k8s-openapi = { version = "0.24.0", features = ["v1_31", "schemars"] }
-tokio = { version = "1.41.1", features = ["full"] }
-serde = { version = "1.0.215", features = ["derive"] }
-schemars = "0.8.21"
-serde_json = "1.0.133"
-futures = "0.3.31"
-serde_yaml = "0.9.34"
-chrono = "0.4.39"
-tracing = "0.1.41"
-tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
+chrono.workspace = true
+futures.workspace = true
+k8s-openapi = { workspace = true, features = ["v1_31", "schemars"] }
+kube = { workspace = true, features = ["derive"] }
+schemars.workspace = true
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+serde_yaml.workspace = true
+tokio = { workspace = true, features = ["full"] }
+tracing.workspace = true
+tracing-subscriber = { workspace = true, features = ["env-filter"] }
