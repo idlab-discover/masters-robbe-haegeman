@@ -1,0 +1,33 @@
+[package]
+name = "benchmark"
+version.workspace = true
+repository.workspace = true
+license.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+
+[[bin]]
+doc = false
+name = "controller"
+path = "src/main.rs"
+
+[[bin]]
+doc = false
+name = "crdgen"
+path = "src/crdgen.rs"
+
+
+[dependencies]
+kube-primary = { path = "../kube-primary" }
+chrono.workspace = true
+futures.workspace = true
+k8s-openapi = { workspace = true, features = ["v1_31", "schemars"] }
+kube = { workspace = true, features = ["derive"] }
+schemars.workspace = true
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+serde_yaml.workspace = true
+tokio = { workspace = true, features = ["full"] }
+tracing.workspace = true
+tracing-subscriber = { workspace = true, features = ["env-filter"] }

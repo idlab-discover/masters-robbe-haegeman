@@ -1,5 +1,5 @@
 [workspace]
-members = ["primary-aggregator-api", "demo-controller", "kube-primary"]
+members = ["primary-aggregator-api", "demo-controller", "kube-primary", "benchmark"]
 resolver = "2"
 
 [workspace.package]
