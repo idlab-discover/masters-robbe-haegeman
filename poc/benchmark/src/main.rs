@@ -1,6 +1,6 @@
 use std::time::SystemTime;
 
-use case::{Case, Measurement, append_case_to_file};
+use case::{Case, append_case_to_file};
 use crd::Database;
 use k8s_openapi::api::core::v1::Secret;
 use kube::{
@@ -34,7 +34,6 @@ async fn main() {
     let mut case = Case::default();
 
     for _ in 0..100 {
-        let mut measurement = Measurement::default();
         let start = SystemTime::now();
 
         let result = db.get_latest_with_secondaries(client.clone()).await;
@@ -43,7 +42,7 @@ async fn main() {
 
         let end = SystemTime::now();
         if let Ok(duration) = end.duration_since(start) {
-            measurement.duration_get_latest = duration.as_micros();
+            case.duration_get_latest.push(duration.as_micros());
         }
 
         let start = SystemTime::now();
@@ -60,10 +59,8 @@ async fn main() {
 
         let end = SystemTime::now();
         if let Ok(duration) = end.duration_since(start) {
-            measurement.duration_direct = duration.as_micros();
+            case.duration_direct.push(duration.as_micros());
         }
-
-        case.measurements.push(measurement);
     }
     append_case_to_file(&case, "./result.jsonl").unwrap();
 }
