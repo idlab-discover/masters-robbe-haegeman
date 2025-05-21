@@ -23,3 +23,9 @@ kubectl get --raw /apis/primary-all/v1/health
 kubectl get pods -l app=primary-aggregator-api
 kubectl rollout restart deployment -n default primary-aggregator-api # Doesn't work since we have to set `imagePullPolicy: Never`
 ```
+
+https://opentelemetry.io/docs/collector/installation/#kubernetes
+```sh
+kubectl apply -f https://raw.githubusercontent.com/open-telemetry/opentelemetry-collector/v0.126.0/examples/k8s/otel-config.yaml
+
+```

@@ -11,7 +11,10 @@ async-trait.workspace = true
 either.workspace = true
 k8s-openapi.workspace = true
 kube = { workspace = true, features = ["derive", "runtime"] }
-kube-core.workspace = true                                    # For its error types
+kube-core.workspace = true                                        # For its error types
+opentelemetry = { workspace = true, features = ["trace"] }
+opentelemetry-otlp.workspace = true
+opentelemetry_sdk = { workspace = true, features = ["rt-tokio"] }
 serde = { workspace = true, features = ["derive"] }
 thiserror.workspace = true
 tracing.workspace = true

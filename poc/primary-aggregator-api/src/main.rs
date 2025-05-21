@@ -8,6 +8,7 @@ use tower::ServiceBuilder;
 use tower_http::trace::{DefaultOnRequest, DefaultOnResponse, TraceLayer};
 use tracing::level_filters::LevelFilter;
 use tracing::{Level, span, trace};
+use tracing_opentelemetry::OpenTelemetryLayer;
 use tracing_subscriber::filter::EnvFilter;
 use tracing_subscriber::fmt;
 use tracing_subscriber::layer::SubscriberExt;
@@ -15,6 +16,7 @@ use tracing_subscriber::util::SubscriberInitExt;
 
 mod error;
 mod resources;
+mod telemetry;
 
 const GROUP: &str = "primary-all";
 const VERSION: &str = "v1";
@@ -22,6 +24,7 @@ const KUBE_PATH_PREFIX: &str = "/apis/primary-all/v1";
 
 #[tokio::main]
 async fn main() {
+    let otel = OpenTelemetryLayer::new(telemetry::init_tracer());
     tracing_subscriber::registry()
         .with(fmt::layer())
         .with(
@@ -29,6 +32,7 @@ async fn main() {
                 .with_default_directive(LevelFilter::INFO.into())
                 .from_env_lossy(),
         )
+        .with(otel)
         .init();
 
     let kube_routes = Router::new()

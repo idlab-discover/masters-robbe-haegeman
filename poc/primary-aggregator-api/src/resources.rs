@@ -1,3 +1,4 @@
+use crate::telemetry;
 use anyhow::{Context, Error};
 use axum::{Json, extract::Path};
 use kube::{
@@ -6,7 +7,7 @@ use kube::{
     discovery::{Scope, verbs},
 };
 use serde::Serialize;
-use tracing::info;
+use tracing::{Span, field, info, instrument};
 
 use crate::error::Result;
 
@@ -16,6 +17,7 @@ pub(crate) struct PrimaryWithSecondariesResponse {
     sec_res: Vec<DynamicObject>,
 }
 
+#[instrument(skip(group, version, kind, namespace, name), fields(trace_id))]
 pub(crate) async fn get_primary_with_secondaries(
     Path((mut group, version, kind, namespace, name)): Path<(
         String,
@@ -25,6 +27,11 @@ pub(crate) async fn get_primary_with_secondaries(
         String,
     )>,
 ) -> Result<Json<PrimaryWithSecondariesResponse>> {
+    let trace_id = telemetry::get_trace_id();
+    if trace_id != opentelemetry::trace::TraceId::INVALID {
+        Span::current().record("trace_id", field::display(&trace_id));
+    }
+
     let client = Client::try_default()
         .await
         .context("Client Creation Error")?;

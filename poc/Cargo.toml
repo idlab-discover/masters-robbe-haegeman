@@ -21,7 +21,13 @@ futures = "0.3.31"
 k8s-openapi = "0.25.0"
 kube = { version = "1.0.0", features = ["aws-lc-rs"] }
 kube-core = { version = "1.0.0", default-features = false } # For its error types
+opentelemetry = "0.27.1"
+opentelemetry-otlp = "0.27.0"
+opentelemetry_sdk = "0.27.1"
 rcgen = "0.13.2"
+rustls = { version = "0.23.27", default-features = false, features = [
+    "aws_lc_rs",
+] }
 schemars = "0.8.22"
 serde = "1.0.219"
 serde_json = "1.0.140"
@@ -31,7 +37,5 @@ tokio = "1.45.0"
 tower = { version = "0.5.2", default-features = false }
 tower-http = { version = "0.6.4", default-features = false }
 tracing = "0.1.41"
+tracing-opentelemetry = "0.28.0"
 tracing-subscriber = "0.3.19"
-rustls = { version = "0.23.27", default-features = false, features = [
-    "aws_lc_rs",
-] }
