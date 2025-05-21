@@ -1,31 +1,5 @@
-import json
-
-from pydantic import BaseModel
-
-
-class Case(BaseModel):
-    nr_resources: int
-    nr_kinds: int
-    duration_get_latest: list[int]
-    duration_direct: list[int]
-
-
-def parse_line(line: str) -> Case:
-    raw = json.loads(line)
-    return Case.model_validate_json(raw)
-
-
-def parse_results_file(path: str) -> list[Case]:
-    with open(path, "r") as infile:
-        lines = infile.readlines()
-
-    cases = []
-    for line in lines:
-        cases.append(parse_line(line))
-
-    return cases
-
+from parsing import parse_results_file
 
 if __name__ == "__main__":
-    cases = parse_results_file("./result.jsonl")
+    cases = parse_results_file("../result.jsonl")
     print(cases)
