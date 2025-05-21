@@ -1,5 +1,6 @@
-use std::{sync::Once, time::SystemTime};
+use std::time::SystemTime;
 
+use case::{Case, Measurement, append_case_to_file};
 use crd::Database;
 use k8s_openapi::api::core::v1::Secret;
 use kube::{
@@ -7,29 +8,12 @@ use kube::{
     api::{ListParams, ObjectMeta, PostParams},
 };
 use kube_primary::PrimaryResourceExt;
-use tracing::{info, level_filters::LevelFilter};
-use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
+pub mod case;
 pub mod crd;
-
-static INIT: Once = Once::new();
-
-fn create_tracing_subscriber() {
-    INIT.call_once(|| {
-        tracing_subscriber::registry()
-            .with(fmt::layer())
-            .with(
-                EnvFilter::builder()
-                    .with_default_directive(LevelFilter::INFO.into())
-                    .from_env_lossy(),
-            )
-            .init();
-    });
-}
 
 #[tokio::main]
 async fn main() {
-    create_tracing_subscriber();
     let client = Client::try_default().await.unwrap();
     let db = Database {
         metadata: ObjectMeta {
@@ -47,39 +31,39 @@ async fn main() {
         None => db_api.create(&PostParams::default(), &db).await.unwrap(),
     };
 
-    let start = SystemTime::now();
+    let mut case = Case::default();
 
-    let result = db.get_latest_with_secondaries(client.clone()).await;
+    for _ in 0..100 {
+        let mut measurement = Measurement::default();
+        let start = SystemTime::now();
 
-    assert!(result.is_ok());
+        let result = db.get_latest_with_secondaries(client.clone()).await;
 
-    let end = SystemTime::now();
-    if let Ok(duration) = end.duration_since(start) {
-        info!(
-            benchmark = true,
-            time = duration.as_micros(),
-            "get_latest_with_secondaries"
-        );
+        assert!(result.is_ok());
+
+        let end = SystemTime::now();
+        if let Ok(duration) = end.duration_since(start) {
+            measurement.duration_get_latest = duration.as_micros();
+        }
+
+        let start = SystemTime::now();
+
+        let db_api: Api<Database> = Api::namespaced(client.clone(), "poc-testing");
+        let db = db_api.get(&db.name_any()).await;
+
+        assert!(db.is_ok());
+
+        let secret_api: Api<Secret> = Api::namespaced(client.clone(), "poc-testing");
+        let secrets = secret_api.list(&ListParams::default()).await;
+
+        assert!(secrets.is_ok());
+
+        let end = SystemTime::now();
+        if let Ok(duration) = end.duration_since(start) {
+            measurement.duration_direct = duration.as_micros();
+        }
+
+        case.measurements.push(measurement);
     }
-
-    let start = SystemTime::now();
-
-    let db_api: Api<Database> = Api::namespaced(client.clone(), "poc-testing");
-    let db = db_api.get(&db.name_any()).await;
-
-    assert!(db.is_ok());
-
-    let secret_api: Api<Secret> = Api::namespaced(client.clone(), "poc-testing");
-    let secrets = secret_api.list(&ListParams::default()).await;
-
-    assert!(secrets.is_ok());
-
-    let end = SystemTime::now();
-    if let Ok(duration) = end.duration_since(start) {
-        info!(
-            benchmark = true,
-            time = duration.as_micros(),
-            "direct listing"
-        );
-    }
+    append_case_to_file(&case, "./result.jsonl").unwrap();
 }
