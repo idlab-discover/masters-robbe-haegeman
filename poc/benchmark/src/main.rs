@@ -1,6 +1,6 @@
 use std::time::SystemTime;
 
-use case::{Case, append_case_to_file};
+use case::{Case, append_case_to_file, create_test_secrets};
 use crd::Database;
 use k8s_openapi::api::core::v1::Secret;
 use kube::{
@@ -26,12 +26,14 @@ async fn main() {
 
     // Create an Api client for the `Database` CRD
     let db_api: Api<Database> = Api::namespaced(client.clone(), "poc-testing");
-    let db = match db_api.get_opt(&db.name_any()).await.unwrap() {
+    let mut db = match db_api.get_opt(&db.name_any()).await.unwrap() {
         Some(db) => db,
         None => db_api.create(&PostParams::default(), &db).await.unwrap(),
     };
 
-    let mut case = Case::default();
+    create_test_secrets(client.clone(), &mut db, 5).await;
+
+    let mut case = Case::new(5, 1);
 
     for _ in 0..100 {
         let start = SystemTime::now();
