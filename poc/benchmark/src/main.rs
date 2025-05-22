@@ -8,7 +8,6 @@ use kube::{
     api::{ListParams, ObjectMeta, PostParams},
 };
 use kube_primary::PrimaryResourceExt;
-use sysinfo::System;
 
 pub mod case;
 pub mod crd;
@@ -51,17 +50,9 @@ async fn main() {
 
         let start = SystemTime::now();
 
-        print!("Before");
-        get_memory_usage(&mut sys);
         let db_api: Api<Database> = Api::namespaced(client.clone(), "poc-testing");
         let db = db_api.get(&db.name_any()).await;
-        let mut db = ManuallyDrop::new(db);
-        print!("After");
-        get_memory_usage(&mut sys);
         assert!(db.is_ok());
-        unsafe {
-            ManuallyDrop::drop(&mut db);
-        }
 
         let secret_api: Api<Secret> = Api::namespaced(client.clone(), "poc-testing");
         let secrets = secret_api.list(&ListParams::default()).await;
@@ -74,13 +65,4 @@ async fn main() {
         }
     }
     append_case_to_file(&case, "./result.jsonl").unwrap();
-}
-
-fn get_memory_usage(sys: &mut System) {
-    sys.refresh_all();
-    if let Some(process) = sys.process(sysinfo::get_current_pid().unwrap()) {
-        println!("Memory usage: {} KB", process.memory());
-    } else {
-        println!("Process not found");
-    }
 }
