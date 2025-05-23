@@ -123,7 +123,8 @@ async fn create_dummy_resources(
                     spec: Some(PodSpec {
                         containers: vec![Container {
                             name: "test-container".to_string(),
-                            image: Some("nginx:latest".to_string()),
+                            image: Some("busybox:latest".to_string()),
+                            command: Some(vec!["sleep".to_string(), "9999999".to_string()]),
                             ..Default::default()
                         }],
                         ..Default::default()
@@ -192,7 +193,8 @@ async fn create_dummy_resources(
                             spec: Some(PodSpec {
                                 containers: vec![Container {
                                     name: "test-container".to_string(),
-                                    image: Some("nginx:latest".to_string()),
+                                    image: Some("busybox:latest".to_string()),
+                                    command: Some(vec!["sleep".to_string(), "9999999".to_string()]),
                                     ..Default::default()
                                 }],
                                 ..Default::default()
