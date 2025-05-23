@@ -1,9 +1,10 @@
+use case::Case;
 use case::timed_assert_ok;
-use case::{Case, create_test_secrets};
 use clap::Parser;
 use cli::Args;
 use crd::Database;
 use crd::apply_database_crd;
+use dummy::create_dummy_resources;
 use k8s_openapi::api::core::v1::Secret;
 use kube::Error;
 use kube::{
@@ -14,9 +15,10 @@ use kube_primary::PrimaryResourceExt;
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
-pub mod case;
+mod case;
 mod cli;
-pub mod crd;
+mod crd;
+mod dummy;
 
 #[tokio::main]
 async fn main() {
@@ -49,7 +51,14 @@ async fn main() {
     let db_api: Api<Database> = Api::namespaced(client.clone(), &args.namespace);
     let mut db = db_api.create(&PostParams::default(), &db).await.unwrap();
 
-    create_test_secrets(client.clone(), &mut db, args.resource_count).await;
+    create_dummy_resources(
+        client.clone(),
+        &mut db,
+        args.resource_count,
+        args.kind_count as usize,
+        args.namespace.clone(),
+    )
+    .await;
 
     let mut case = Case::new(args.resource_count, args.kind_count as usize);
 
@@ -70,9 +79,10 @@ async fn main() {
         .await;
     }
 
-    case.write_to_file(&args.file_path, args.append).unwrap();
+    case.write_to_file(&args.file_path, !args.overwrite)
+        .unwrap();
 
-    if args.cleanup {
+    if !args.keep_values {
         db_api
             .delete(&db.name_any(), &DeleteParams::default())
             .await

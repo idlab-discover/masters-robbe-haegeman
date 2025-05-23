@@ -18,12 +18,20 @@ cargo run -- -f ./results.jsonl -r 100 -k 1
 Usage: benchmark [OPTIONS] --file-path <FILE_PATH> --resource-count <RESOURCE_COUNT> --kind-count <KIND_COUNT>
 
 Options:
-  -f, --file-path <FILE_PATH>            File to output the JSONL results to
-  -r, --resource-count <RESOURCE_COUNT>  Number of resources to create
-  -k, --kind-count <KIND_COUNT>          Number of distinct kinds to use (maximum of 1)
-  -i, --iterations <ITERATIONS>          Number of iterations to test [default: 100]
-  -c, --cleanup                          Remove the primary and its secondaries at the end
-  -a, --append                           Append the results to the file instead of overwriting
-  -n, --namespace <NAMESPACE>            Namespace to use [default: poc-testing]
-  -h, --help                             Print help
+  -f, --file-path <FILE_PATH>
+          File to output the JSONL results to
+  -r, --resource-count <RESOURCE_COUNT>
+          Number of resources to create
+  -k, --kind-count <KIND_COUNT>
+          Number of distinct kinds to use (maximum of 5) Kinds used in order: [secret, pod, service, configmap, deployment]
+  -i, --iterations <ITERATIONS>
+          Number of iterations to test [default: 100]
+      --keep-values
+          Do not remove the primary and its secondaries at the end
+  -o, --overwrite
+          Append the results to the file instead of overwriting
+  -n, --namespace <NAMESPACE>
+          Namespace to use [default: poc-testing]
+  -h, --help
+          Print help
 ```
