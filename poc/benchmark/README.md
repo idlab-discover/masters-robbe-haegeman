@@ -32,6 +32,8 @@ Options:
           Append the results to the file instead of overwriting
   -n, --namespace <NAMESPACE>
           Namespace to use [default: poc-testing]
+  -d, --delay <DELAY>
+          Delay in seconds to wait after dummy resource creation [default: 0]
   -h, --help
           Print help
 ```
