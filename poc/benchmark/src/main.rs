@@ -5,7 +5,11 @@ use cli::Args;
 use crd::Database;
 use crd::apply_database_crd;
 use dummy::create_dummy_resources_by_count;
+use k8s_openapi::api::apps::v1::Deployment;
+use k8s_openapi::api::core::v1::ConfigMap;
+use k8s_openapi::api::core::v1::Pod;
 use k8s_openapi::api::core::v1::Secret;
+use k8s_openapi::api::core::v1::Service;
 use kube::Error;
 use kube::{
     Api, Client, ResourceExt,
@@ -69,12 +73,40 @@ async fn main() {
         )
         .await;
 
+        let mut secrets = None;
+        let mut pods = None;
+        let mut services = None;
+        let mut configmaps = None;
+        let mut deployments = None;
+
         timed_assert_ok::<_, _, Error>(&mut case.duration_direct, async {
             let db_api: Api<Database> = Api::namespaced(client.clone(), &args.namespace);
             let db = db_api.get(&db.name_any()).await?;
-            let secret_api: Api<Secret> = Api::namespaced(client.clone(), &args.namespace);
-            let secrets = secret_api.list(&ListParams::default()).await?;
-            Ok((db, secrets))
+
+            if args.kind_count >= 1 {
+                let secret_api: Api<Secret> = Api::namespaced(client.clone(), &args.namespace);
+                secrets = Some(secret_api.list(&ListParams::default()).await?);
+            }
+            if args.kind_count >= 2 {
+                let pod_api: Api<Pod> = Api::namespaced(client.clone(), &args.namespace);
+                pods = Some(pod_api.list(&ListParams::default()).await?);
+            }
+            if args.kind_count >= 3 {
+                let service_api: Api<Service> = Api::namespaced(client.clone(), &args.namespace);
+                services = Some(service_api.list(&ListParams::default()).await?);
+            }
+            if args.kind_count >= 4 {
+                let configmap_api: Api<ConfigMap> =
+                    Api::namespaced(client.clone(), &args.namespace);
+                configmaps = Some(configmap_api.list(&ListParams::default()).await?);
+            }
+            if args.kind_count >= 5 {
+                let deployment_api: Api<Deployment> =
+                    Api::namespaced(client.clone(), &args.namespace);
+                deployments = Some(deployment_api.list(&ListParams::default()).await?);
+            }
+
+            Ok((db, secrets, pods, services, configmaps, deployments))
         })
         .await;
     }
