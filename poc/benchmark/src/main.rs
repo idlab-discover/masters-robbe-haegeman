@@ -1,4 +1,4 @@
-use std::{mem::ManuallyDrop, time::SystemTime};
+use std::time::SystemTime;
 
 use case::{Case, append_case_to_file, create_test_secrets};
 use crd::Database;
@@ -14,7 +14,6 @@ pub mod crd;
 
 #[tokio::main]
 async fn main() {
-    let mut sys = System::new_all();
     let client = Client::try_default().await.unwrap();
     let db = Database {
         metadata: ObjectMeta {
