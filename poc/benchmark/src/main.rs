@@ -16,6 +16,7 @@ use kube::{
     api::{DeleteParams, ListParams, ObjectMeta, PostParams},
 };
 use kube_primary::PrimaryResourceExt;
+use tokio::time::{Duration, sleep};
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -63,6 +64,8 @@ async fn main() {
         args.namespace.clone(),
     )
     .await;
+
+    sleep(Duration::from_secs(args.delay)).await;
 
     let mut case = Case::new(args.resource_count, args.kind_count as usize);
 

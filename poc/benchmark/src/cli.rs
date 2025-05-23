@@ -34,4 +34,8 @@ pub(crate) struct Args {
     /// Namespace to use
     #[arg(short, long, default_value = "poc-testing")]
     pub namespace: String,
+
+    /// Delay in seconds to wait after dummy resource creation
+    #[arg(short, long, default_value_t = 0)]
+    pub delay: u64,
 }
