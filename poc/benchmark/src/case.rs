@@ -2,81 +2,50 @@ use std::{
     collections::BTreeMap,
     fs::OpenOptions,
     io::{self, Write},
+    path::PathBuf,
 };
 
-use k8s_openapi::{
-    ByteString, Metadata, api::core::v1::Secret,
-    apiextensions_apiserver::pkg::apis::apiextensions::v1::CustomResourceDefinition,
-};
+use k8s_openapi::{ByteString, Metadata, api::core::v1::Secret};
 use kube::{
-    Api, Client, CustomResourceExt,
+    Client,
     api::{ObjectMeta, PostParams},
 };
 use kube_primary::PrimaryResourceExt;
 use serde::Serialize;
-use tracing::{debug, trace};
+use std::future::Future;
+use std::hint::black_box;
+use std::time::SystemTime;
 
 use crate::crd::Database;
 
 #[derive(Debug, Serialize, Default)]
 pub struct Case {
-    pub nr_resources: usize,
-    pub nr_kinds: usize,
+    pub resource_count: usize,
+    pub kind_count: usize,
     pub duration_get_latest: Vec<u128>,
     pub duration_direct: Vec<u128>,
 }
 
 impl Case {
-    pub fn new(nr_resources: usize, nr_kinds: usize) -> Self {
+    pub fn new(resource_count: usize, kind_count: usize) -> Self {
         Self {
-            nr_resources,
-            nr_kinds,
+            resource_count,
+            kind_count,
             ..Default::default()
         }
     }
-}
 
-pub fn append_case_to_file(case: &Case, file_path: &str) -> io::Result<()> {
-    // Serialize the case to a JSON string
-    let json = serde_json::to_string(case)?;
+    pub fn write_to_file(&self, file_path: &PathBuf, append: bool) -> io::Result<()> {
+        let json = serde_json::to_string(self)?;
 
-    // Open the file in append mode, create it if it doesn't exist
-    let mut file = OpenOptions::new()
-        .append(true)
-        .create(true)
-        .open(file_path)?;
+        let mut file = OpenOptions::new()
+            .append(append)
+            .create(true)
+            .open(file_path)?;
 
-    // Append the JSON string followed by a newline
-    writeln!(file, "{}", json)?;
+        writeln!(file, "{}", json)?;
 
-    Ok(())
-}
-
-pub async fn apply_database_crd(client: Client) -> CustomResourceDefinition {
-    let crds: Api<CustomResourceDefinition> = Api::all(client);
-    let crd = Database::crd();
-    let name = crd.metadata.name.as_ref().unwrap();
-
-    match crds.get_opt(name).await.unwrap() {
-        Some(crds) => crds,
-        None => {
-            debug!("Creating CRD");
-            crds.create(&PostParams::default(), &crd).await.unwrap();
-
-            // The create command waits for the resource to be created, not until the CRD is registered.
-            // Verify that the CRD is available
-            // https://stackoverflow.com/questions/57115602/how-to-kubectl-wait-for-crd-creation
-            loop {
-                let crd = crds.get_opt(name).await.unwrap().unwrap();
-                trace!("{:?}", crd);
-
-                if let Some(conditions) = crd.status.as_ref().and_then(|s| s.conditions.as_ref()) {
-                    if conditions.iter().any(|c| c.type_ == "Established") {
-                        break crd;
-                    }
-                }
-            }
-        }
+        Ok(())
     }
 }
 
@@ -104,4 +73,20 @@ pub async fn create_test_secrets(client: Client, db: &mut Database, amount: usiz
             .await
             .unwrap();
     }
+}
+
+pub async fn timed_assert_ok<F, T, E>(case_durations: &mut Vec<u128>, fut: F)
+where
+    F: Future<Output = Result<T, E>>,
+{
+    let start = SystemTime::now();
+    let result = fut.await;
+    let end = SystemTime::now();
+
+    if let Ok(duration) = end.duration_since(start) {
+        case_durations.push(duration.as_micros());
+    }
+
+    assert!(result.is_ok());
+    let _ = black_box(result);
 }

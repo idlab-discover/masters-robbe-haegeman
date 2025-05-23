@@ -4,8 +4,8 @@ from pydantic import BaseModel
 
 
 class Case(BaseModel):
-    nr_resources: int
-    nr_kinds: int
+    resource_count: int
+    kind_count: int
     duration_get_latest: list[int]
     duration_direct: list[int]
 

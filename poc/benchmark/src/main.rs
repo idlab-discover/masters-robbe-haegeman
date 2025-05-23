@@ -1,16 +1,21 @@
-use case::{Case, append_case_to_file, apply_database_crd, create_test_secrets};
+use case::timed_assert_ok;
+use case::{Case, create_test_secrets};
+use clap::Parser;
+use cli::Args;
 use crd::Database;
+use crd::apply_database_crd;
 use k8s_openapi::api::core::v1::Secret;
+use kube::Error;
 use kube::{
     Api, Client, ResourceExt,
     api::{DeleteParams, ListParams, ObjectMeta, PostParams},
 };
 use kube_primary::PrimaryResourceExt;
-use std::time::SystemTime;
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
 pub mod case;
+mod cli;
 pub mod crd;
 
 #[tokio::main]
@@ -24,6 +29,8 @@ async fn main() {
         )
         .init();
 
+    let args = Args::parse();
+
     let client = Client::try_default().await.unwrap();
 
     apply_database_crd(client.clone()).await;
@@ -31,7 +38,7 @@ async fn main() {
     let db = Database {
         metadata: ObjectMeta {
             name: Some(String::from("test")),
-            namespace: Some(String::from("poc-testing")),
+            namespace: Some(args.namespace.clone()),
             ..Default::default()
         },
         ..Default::default()
@@ -39,47 +46,36 @@ async fn main() {
 
     // We assume that the previous Database resource is removed
     // Since all secondaries have OwnerReferences, these will be removed as well
-    let db_api: Api<Database> = Api::namespaced(client.clone(), "poc-testing");
+    let db_api: Api<Database> = Api::namespaced(client.clone(), &args.namespace);
     let mut db = db_api.create(&PostParams::default(), &db).await.unwrap();
 
-    let nr_secrets = 100;
+    create_test_secrets(client.clone(), &mut db, args.resource_count).await;
 
-    create_test_secrets(client.clone(), &mut db, nr_secrets).await;
+    let mut case = Case::new(args.resource_count, args.kind_count as usize);
 
-    let mut case = Case::new(nr_secrets, 1);
+    for _ in 0..args.iterations {
+        timed_assert_ok(
+            &mut case.duration_get_latest,
+            db.get_latest_with_secondaries(client.clone()),
+        )
+        .await;
 
-    for _ in 0..100 {
-        let start = SystemTime::now();
-
-        let result = db.get_latest_with_secondaries(client.clone()).await;
-
-        assert!(result.is_ok());
-
-        let end = SystemTime::now();
-        if let Ok(duration) = end.duration_since(start) {
-            case.duration_get_latest.push(duration.as_micros());
-        }
-
-        let start = SystemTime::now();
-
-        let db_api: Api<Database> = Api::namespaced(client.clone(), "poc-testing");
-        let db = db_api.get(&db.name_any()).await;
-        assert!(db.is_ok());
-
-        let secret_api: Api<Secret> = Api::namespaced(client.clone(), "poc-testing");
-        let secrets = secret_api.list(&ListParams::default()).await;
-
-        assert!(secrets.is_ok());
-
-        let end = SystemTime::now();
-        if let Ok(duration) = end.duration_since(start) {
-            case.duration_direct.push(duration.as_micros());
-        }
+        timed_assert_ok::<_, _, Error>(&mut case.duration_direct, async {
+            let db_api: Api<Database> = Api::namespaced(client.clone(), &args.namespace);
+            let db = db_api.get(&db.name_any()).await?;
+            let secret_api: Api<Secret> = Api::namespaced(client.clone(), &args.namespace);
+            let secrets = secret_api.list(&ListParams::default()).await?;
+            Ok((db, secrets))
+        })
+        .await;
     }
-    append_case_to_file(&case, "./result.jsonl").unwrap();
 
-    db_api
-        .delete(&db.name_any(), &DeleteParams::default())
-        .await
-        .unwrap();
+    case.write_to_file(&args.file_path, args.append).unwrap();
+
+    if args.cleanup {
+        db_api
+            .delete(&db.name_any(), &DeleteParams::default())
+            .await
+            .unwrap();
+    }
 }

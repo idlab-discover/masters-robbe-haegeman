@@ -1,10 +1,16 @@
 #![allow(clippy::derivable_impls)]
 
-use kube::{CustomResource, api::DynamicObject, core::object::HasStatus};
+use k8s_openapi::apiextensions_apiserver::pkg::apis::apiextensions::v1::CustomResourceDefinition;
+use kube::{
+    Api, Client, CustomResource, CustomResourceExt,
+    api::{DynamicObject, PostParams},
+    core::object::HasStatus,
+};
 use kube_primary::PrimaryResourceExt;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
+use tracing::{debug, trace};
 
 #[derive(CustomResource, Debug, Serialize, Deserialize, Default, Clone, JsonSchema)]
 #[kube(group = "poc.sec.res", version = "v1", kind = "Database", namespaced)]
@@ -36,6 +42,34 @@ impl Default for Database {
             metadata: Default::default(),
             spec: Default::default(),
             status: Default::default(),
+        }
+    }
+}
+
+pub async fn apply_database_crd(client: Client) -> CustomResourceDefinition {
+    let crds: Api<CustomResourceDefinition> = Api::all(client);
+    let crd = Database::crd();
+    let name = crd.metadata.name.as_ref().unwrap();
+
+    match crds.get_opt(name).await.unwrap() {
+        Some(crds) => crds,
+        None => {
+            debug!("Creating CRD");
+            crds.create(&PostParams::default(), &crd).await.unwrap();
+
+            // The create command waits for the resource to be created, not until the CRD is registered.
+            // Verify that the CRD is available
+            // https://stackoverflow.com/questions/57115602/how-to-kubectl-wait-for-crd-creation
+            loop {
+                let crd = crds.get_opt(name).await.unwrap().unwrap();
+                trace!("{:?}", crd);
+
+                if let Some(conditions) = crd.status.as_ref().and_then(|s| s.conditions.as_ref()) {
+                    if conditions.iter().any(|c| c.type_ == "Established") {
+                        break crd;
+                    }
+                }
+            }
         }
     }
 }
