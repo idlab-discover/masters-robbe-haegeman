@@ -1,6 +1,6 @@
 use std::time::SystemTime;
 
-use case::{Case, append_case_to_file, create_test_secrets};
+use case::{Case, append_case_to_file, apply_database_crd, create_test_secrets};
 use crd::Database;
 use k8s_openapi::api::core::v1::Secret;
 use kube::{
@@ -8,13 +8,27 @@ use kube::{
     api::{ListParams, ObjectMeta, PostParams},
 };
 use kube_primary::PrimaryResourceExt;
+use tracing::level_filters::LevelFilter;
+use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
 pub mod case;
 pub mod crd;
 
 #[tokio::main]
 async fn main() {
+    tracing_subscriber::registry()
+        .with(fmt::layer())
+        .with(
+            EnvFilter::builder()
+                .with_default_directive(LevelFilter::ERROR.into())
+                .from_env_lossy(),
+        )
+        .init();
+
     let client = Client::try_default().await.unwrap();
+
+    apply_database_crd(client.clone()).await;
+
     let db = Database {
         metadata: ObjectMeta {
             name: Some(String::from("test")),
@@ -31,7 +45,7 @@ async fn main() {
         None => db_api.create(&PostParams::default(), &db).await.unwrap(),
     };
 
-    // create_test_secrets(client.clone(), &mut db, 5).await;
+    create_test_secrets(client.clone(), &mut db, 5).await;
 
     let mut case = Case::new(5, 1);
 

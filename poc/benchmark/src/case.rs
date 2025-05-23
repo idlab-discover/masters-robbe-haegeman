@@ -4,13 +4,17 @@ use std::{
     io::{self, Write},
 };
 
-use k8s_openapi::{ByteString, Metadata, api::core::v1::Secret};
+use k8s_openapi::{
+    ByteString, Metadata, api::core::v1::Secret,
+    apiextensions_apiserver::pkg::apis::apiextensions::v1::CustomResourceDefinition,
+};
 use kube::{
-    Client,
+    Api, Client, CustomResourceExt,
     api::{ObjectMeta, PostParams},
 };
 use kube_primary::PrimaryResourceExt;
 use serde::Serialize;
+use tracing::{debug, trace};
 
 use crate::crd::Database;
 
@@ -46,6 +50,34 @@ pub fn append_case_to_file(case: &Case, file_path: &str) -> io::Result<()> {
     writeln!(file, "{}", json)?;
 
     Ok(())
+}
+
+pub async fn apply_database_crd(client: Client) -> CustomResourceDefinition {
+    let crds: Api<CustomResourceDefinition> = Api::all(client);
+    let crd = Database::crd();
+    let name = crd.metadata.name.as_ref().unwrap();
+
+    match crds.get_opt(name).await.unwrap() {
+        Some(crds) => crds,
+        None => {
+            debug!("Creating CRD");
+            crds.create(&PostParams::default(), &crd).await.unwrap();
+
+            // The create command waits for the resource to be created, not until the CRD is registered.
+            // Verify that the CRD is available
+            // https://stackoverflow.com/questions/57115602/how-to-kubectl-wait-for-crd-creation
+            loop {
+                let crd = crds.get_opt(name).await.unwrap().unwrap();
+                trace!("{:?}", crd);
+
+                if let Some(conditions) = crd.status.as_ref().and_then(|s| s.conditions.as_ref()) {
+                    if conditions.iter().any(|c| c.type_ == "Established") {
+                        break crd;
+                    }
+                }
+            }
+        }
+    }
 }
 
 pub async fn create_test_secrets(client: Client, db: &mut Database, amount: usize) {

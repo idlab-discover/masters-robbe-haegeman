@@ -9,7 +9,7 @@ rust-version.workspace = true
 
 [[bin]]
 doc = false
-name = "controller"
+name = "benchmark"
 path = "src/main.rs"
 
 [[bin]]
