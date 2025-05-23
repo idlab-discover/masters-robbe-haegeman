@@ -1,13 +1,12 @@
-use std::time::SystemTime;
-
 use case::{Case, append_case_to_file, apply_database_crd, create_test_secrets};
 use crd::Database;
 use k8s_openapi::api::core::v1::Secret;
 use kube::{
     Api, Client, ResourceExt,
-    api::{ListParams, ObjectMeta, PostParams},
+    api::{DeleteParams, ListParams, ObjectMeta, PostParams},
 };
 use kube_primary::PrimaryResourceExt;
+use std::time::SystemTime;
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -38,16 +37,16 @@ async fn main() {
         ..Default::default()
     };
 
-    // Create an Api client for the `Database` CRD
+    // We assume that the previous Database resource is removed
+    // Since all secondaries have OwnerReferences, these will be removed as well
     let db_api: Api<Database> = Api::namespaced(client.clone(), "poc-testing");
-    let mut db = match db_api.get_opt(&db.name_any()).await.unwrap() {
-        Some(db) => db,
-        None => db_api.create(&PostParams::default(), &db).await.unwrap(),
-    };
+    let mut db = db_api.create(&PostParams::default(), &db).await.unwrap();
 
-    create_test_secrets(client.clone(), &mut db, 5).await;
+    let nr_secrets = 100;
 
-    let mut case = Case::new(5, 1);
+    create_test_secrets(client.clone(), &mut db, nr_secrets).await;
+
+    let mut case = Case::new(nr_secrets, 1);
 
     for _ in 0..100 {
         let start = SystemTime::now();
@@ -78,4 +77,9 @@ async fn main() {
         }
     }
     append_case_to_file(&case, "./result.jsonl").unwrap();
+
+    db_api
+        .delete(&db.name_any(), &DeleteParams::default())
+        .await
+        .unwrap();
 }
