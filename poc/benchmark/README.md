@@ -26,7 +26,7 @@ Options:
           Number of distinct kinds to use (maximum of 5) Kinds used in order: [secret, pod, service, configmap, deployment]
   -i, --iterations <ITERATIONS>
           Number of iterations to test [default: 100]
-      --keep-values
+      --keep-resources
           Do not remove the primary and its secondaries at the end
   -o, --overwrite
           Append the results to the file instead of overwriting

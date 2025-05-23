@@ -4,7 +4,7 @@ use clap::Parser;
 use cli::Args;
 use crd::Database;
 use crd::apply_database_crd;
-use dummy::create_dummy_resources;
+use dummy::create_dummy_resources_by_count;
 use k8s_openapi::api::core::v1::Secret;
 use kube::Error;
 use kube::{
@@ -51,7 +51,7 @@ async fn main() {
     let db_api: Api<Database> = Api::namespaced(client.clone(), &args.namespace);
     let mut db = db_api.create(&PostParams::default(), &db).await.unwrap();
 
-    create_dummy_resources(
+    create_dummy_resources_by_count(
         client.clone(),
         &mut db,
         args.resource_count,
@@ -82,7 +82,7 @@ async fn main() {
     case.write_to_file(&args.file_path, !args.overwrite)
         .unwrap();
 
-    if !args.keep_values {
+    if !args.keep_resources {
         db_api
             .delete(&db.name_any(), &DeleteParams::default())
             .await

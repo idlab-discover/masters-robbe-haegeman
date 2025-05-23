@@ -25,7 +25,7 @@ pub(crate) struct Args {
 
     /// Do not remove the primary and its secondaries at the end
     #[arg(long)]
-    pub keep_values: bool,
+    pub keep_resources: bool,
 
     /// Append the results to the file instead of overwriting
     #[arg(short, long)]
