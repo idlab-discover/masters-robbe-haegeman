@@ -96,5 +96,6 @@ kubectl apply -f ./primary-aggregator-api/manifests/api_server.yaml
 # For some reason, the job is able to fail if both are configured in the same manifest file :/
 kubectl apply -f ./benchmark/manifests/setup.yaml
 kubectl apply -f ./benchmark/manifests/job.yaml
-kubectl cp poc-testing/<pod-name>:/output/results_resource_latency.jsonl ./results_resource_latency.jsonl
+kubectl cp poc-testing/<pod-name>:/output/results_resource_latency.jsonl ./benchmark/results_resource_latency.jsonl -c sidecar-keep-alive
+kubectl cp poc-testing/<pod-name>:/output/results_kind_latency.jsonl ./benchmark/results_kind_latency.jsonl -c sidecar-keep-alive
 ```
