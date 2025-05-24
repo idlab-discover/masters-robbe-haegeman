@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: benchmark
+  namespace: poc-testing
+spec:
+  template:
+    metadata:
+      labels:
+        app: benchmark
+    spec:
+      serviceAccountName: benchmark
+      restartPolicy: Never
+      containers:
+        - name: benchmark
+          image: benchmark
+          imagePullPolicy: Never
+          command: ["/compare_resource_latency.sh"]
+          volumeMounts:
+            - name: output
+              mountPath: /output
+      volumes:
+        - name: output
+          emptyDir: {}
+  backoffLimit: 1

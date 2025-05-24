@@ -38,6 +38,13 @@ Options:
           Print help
 ```
 
+## Container
+
+```sh
+docker build -f benchmark/Dockerfile -t benchmark .
+docker run -it -v "$PWD/results:/results" benchmark benchmark /results/result.json -r 0 -k 0
+```
+
 ## Gcloud setup
 
 [Terraform Tutorial: Provision a GKE cluster (Google Cloud)](https://developer.hashicorp.com/terraform/tutorials/kubernetes/gke) was used for directions.
@@ -59,4 +66,17 @@ IMAGE_NAME=gcr.io/$PROJECT_ID/primary-aggregator-api:latest
 
 docker tag primary-aggregator-api:latest $IMAGE_NAME
 docker push $IMAGE_NAME
+```
+
+## Complete local testing workflow
+
+```sh
+minikube start
+minikube image load primary-aggregator-api:latest
+kubectl apply -f ./primary-aggregator-api/manifests/api_server.yaml
+minikube image load benchmark:latest
+# For some reason, the job is able to fail if both are configured in the same manifest file :/
+kubectl apply -f ./benchmark/manifests/setup.yaml
+kubectl apply -f ./benchmark/manifests/job.yaml
+kubectl cp poc-testing/<pod-name>:/output/results_resource_latency.jsonl ./results_resource_latency.jsonl
 ```
