@@ -19,6 +19,13 @@ spec:
           volumeMounts:
             - name: output
               mountPath: /output
+        # Init container setup for sidecar not possible: https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/#jobs-with-sidecar-containers
+        - name: sidecar-keep-alive
+          image: busybox
+          command: ["sleep", "3600"]
+          volumeMounts:
+            - name: output
+              mountPath: /output
       volumes:
         - name: output
           emptyDir: {}

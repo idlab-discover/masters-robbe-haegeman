@@ -5,21 +5,6 @@ metadata:
   name: poc-testing
 ---
 apiVersion: v1
-kind: Service
-metadata:
-  name: benchmark
-  namespace: poc-testing
-spec:
-  ports:
-    - name: https
-      port: 3000
-      protocol: TCP
-      targetPort: https
-  selector:
-    app: benchmark
-  type: ClusterIP
----
-apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: benchmark
