@@ -37,3 +37,26 @@ Options:
   -h, --help
           Print help
 ```
+
+## Gcloud setup
+
+[Terraform Tutorial: Provision a GKE cluster (Google Cloud)](https://developer.hashicorp.com/terraform/tutorials/kubernetes/gke) was used for directions.
+
+Kept as much default as possible
+But move to single zone setup and increase Kubernetes version from 1.27 to 1.31
+
+```sh
+terraform init
+# Warning: took around 12 minutes (40 when failing due to lack of available resources)
+terraform apply
+```
+
+```sh
+gcloud auth configure-docker
+
+PROJECT_ID=$(gcloud config get-value project --quiet)
+IMAGE_NAME=gcr.io/$PROJECT_ID/primary-aggregator-api:latest
+
+docker tag primary-aggregator-api:latest $IMAGE_NAME
+docker push $IMAGE_NAME
+```

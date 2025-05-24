@@ -9,9 +9,14 @@ variable "region" {
   description = "region"
 }
 
+variable "zone" {
+  description = "zone"
+}
+
 provider "google" {
   project = var.project_id
   region  = var.region
+  credentials = file("/media/sf_cloud-storage-and-computing/gce-sysadmin-terraform.json")
 }
 
 # VPC
