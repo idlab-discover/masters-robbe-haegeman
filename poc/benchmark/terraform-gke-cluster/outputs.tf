@@ -6,6 +6,11 @@ output "region" {
   description = "GCloud Region"
 }
 
+output "zone" {
+  value       = var.zone
+  description = "GCloud Region"
+}
+
 output "project_id" {
   value       = var.project_id
   description = "GCloud Project ID"

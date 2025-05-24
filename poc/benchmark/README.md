@@ -45,7 +45,7 @@ docker build -f benchmark/Dockerfile -t benchmark .
 docker run -it -v "$PWD/results:/results" benchmark benchmark /results/result.json -r 0 -k 0
 ```
 
-## Gcloud setup
+## GCloud setup
 
 [Terraform Tutorial: Provision a GKE cluster (Google Cloud)](https://developer.hashicorp.com/terraform/tutorials/kubernetes/gke) was used for directions.
 
@@ -62,10 +62,17 @@ terraform apply
 gcloud auth configure-docker
 
 PROJECT_ID=$(gcloud config get-value project --quiet)
-IMAGE_NAME=gcr.io/$PROJECT_ID/primary-aggregator-api:latest
 
-docker tag primary-aggregator-api:latest $IMAGE_NAME
-docker push $IMAGE_NAME
+IMAGE_NAME_API=gcr.io/$PROJECT_ID/primary-aggregator-api:latest
+docker tag primary-aggregator-api:latest $IMAGE_NAME_API
+docker push $IMAGE_NAME_API
+
+IMAGE_NAME_BENCH=gcr.io/$PROJECT_ID/benchmark:latest
+docker tag benchmark:latest $IMAGE_NAME_BENCH
+docker push $IMAGE_NAME_BENCH
+
+gcloud components install gke-gcloud-auth-plugin
+gcloud container clusters get-credentials $(terraform output -raw kubernetes_cluster_name) --zone $(terraform output -raw zone)
 ```
 
 ## Complete local testing workflow
@@ -73,8 +80,19 @@ docker push $IMAGE_NAME
 ```sh
 minikube start
 minikube image load primary-aggregator-api:latest
-kubectl apply -f ./primary-aggregator-api/manifests/api_server.yaml
 minikube image load benchmark:latest
+```
+
+## Execute benchmarks within cluster
+
+Note that the image names will have to be updated when using the GCR.
+The imagePullPolicy also has to be modified.
+
+- `benchmark` -> `gcr.io/$PROJECT_ID/benchmark:latest`
+- `primary-aggregator-api` -> `gcr.io/$PROJECT_ID/primary-aggregator-api:latest`
+
+```sh
+kubectl apply -f ./primary-aggregator-api/manifests/api_server.yaml
 # For some reason, the job is able to fail if both are configured in the same manifest file :/
 kubectl apply -f ./benchmark/manifests/setup.yaml
 kubectl apply -f ./benchmark/manifests/job.yaml
