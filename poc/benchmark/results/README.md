@@ -27,22 +27,24 @@
 ## `minikube_internal`
 
 - **Environment**: Minikube (single-node)
+  - Default settings (CPUs=2, Memory=3800MB)
 - **Node Placement**: Affinity settings have no effect due to single-node setup
 - **Deployment Mode**: In-cluster execution
 - **Component**: `primary-aggregator-api` running inside Minikube
 - **Status**:
-  - **RESOURCES**: ⏳ TODO
-  - **KINDS**: ⏳ TODO
+  - **RESOURCES**: ✅ 25/05/25 - 13:30
+  - **KINDS**: ✅ 25/05/25 - 13:40
 
 ---
 
 ## `minikube_external`
 
 - **Environment**: Minikube (single-node)
+  - Default settings (CPUs=2, Memory=3800MB)
 - **Node Placement**: Affinity settings have no effect due to single-node setup
 - **Deployment Mode**: Out-of-cluster execution
   - benchmark runs from the host using `kubectl`
 - **Component**: `primary-aggregator-api` running inside Minikube
 - **Status**:
-  - **RESOURCES**: ⏳ TODO
-  - **KINDS**: ⏳ TODO
+  - **RESOURCES**:  ✅ 25/05/25 - 14:15
+  - **KINDS**: ⏳ 25/05/25 - 14:30
