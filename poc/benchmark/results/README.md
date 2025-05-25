@@ -4,7 +4,7 @@
 
 - **Environment**: GKE (Google Kubernetes Engine), deployed via Terraform
 - **Node Placement**: Anti-affinity
-  - `benchmark` and `primary-aggregator-api` are scheduled on separate nodes
+  - `benchmark` and `primary-aggregator-api` are scheduled on separate nodes (verified using `kubectl get pods -o wide -n poc-testing`)
 - **Deployment Mode**: In-cluster execution
 - **Status**:
   - **RESOURCES**: ✅ 25/05/25 - 00:40
@@ -16,11 +16,11 @@
 
 - **Environment**: GKE, deployed via Terraform
 - **Node Placement**: Affinity:
-  - `benchmark` and `primary-aggregator-api` are co-located on the same node
+  - `benchmark` and `primary-aggregator-api` are co-located on the same node (verified using `kubectl get pods -o wide -n poc-testing`)
 - **Deployment Mode**: In-cluster execution
 - **Status**:
-  - **RESOURCES**: ⏳ TODO
-  - **KINDS**: ⏳ TODO
+  - **RESOURCES**: ✅ 25/05/25 - 01:20
+  - **KINDS**: ✅ 25/05/25 - 01:40
 
 ---
 
