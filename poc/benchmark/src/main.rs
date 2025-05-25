@@ -65,7 +65,7 @@ async fn main() {
     )
     .await;
 
-    sleep(Duration::from_secs(args.delay)).await;
+    sleep(Duration::from_secs(args.delay_after_creation)).await;
 
     let mut case = Case::new(args.resource_count, args.kind_count as usize);
 
@@ -75,6 +75,8 @@ async fn main() {
             db.get_latest_with_secondaries(client.clone()),
         )
         .await;
+
+        sleep(Duration::from_secs(args.delay_after_request)).await;
 
         let mut secrets = None;
         let mut pods = None;
@@ -112,6 +114,8 @@ async fn main() {
             Ok((db, secrets, pods, services, configmaps, deployments))
         })
         .await;
+
+        sleep(Duration::from_secs(args.delay_after_request)).await;
     }
 
     case.write_to_file(&args.file_path, !args.overwrite)

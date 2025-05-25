@@ -37,5 +37,9 @@ pub(crate) struct Args {
 
     /// Delay in seconds to wait after dummy resource creation
     #[arg(short, long, default_value_t = 0)]
-    pub delay: u64,
+    pub delay_after_creation: u64,
+
+    /// Delay in seconds to wait after each request (so 2 times each iteration)
+    #[arg(long, default_value_t = 0)]
+    pub delay_after_request: u64,
 }
