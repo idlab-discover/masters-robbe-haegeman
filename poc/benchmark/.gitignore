@@ -181,6 +181,6 @@ cython_debug/
 .cursorindexingignore
 
 result*.jsonl
+**.pdf
 !**/results/**
 **fonts
-**.pdf
