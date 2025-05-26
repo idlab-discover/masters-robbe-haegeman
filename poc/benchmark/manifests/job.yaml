@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: benchmark
+  namespace: poc-testing
+spec:
+  template:
+    metadata:
+      labels:
+        app: benchmark
+    spec:
+      # https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#an-example-of-a-pod-that-uses-pod-affinity
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: primary-aggregator-api
+                topologyKey: kubernetes.io/hostname
+      serviceAccountName: benchmark
+      restartPolicy: Never
+      containers:
+        - name: benchmark
+          image: benchmark
+          imagePullPolicy: Never
+          command: ["/compare_resource_latency.sh"]
+          volumeMounts:
+            - name: output
+              mountPath: /output
+        # Init container setup for sidecar not possible: https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/#jobs-with-sidecar-containers
+        - name: sidecar-keep-alive
+          image: busybox
+          command: ["sleep", "3600"]
+          volumeMounts:
+            - name: output
+              mountPath: /output
+      volumes:
+        - name: output
+          emptyDir: {}
+  backoffLimit: 1
