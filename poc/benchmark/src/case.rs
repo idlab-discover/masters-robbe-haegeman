@@ -34,7 +34,7 @@ impl Case {
             .create(true)
             .open(file_path)?;
 
-        writeln!(file, "{}", json)?;
+        writeln!(file, "{json}")?;
 
         Ok(())
     }

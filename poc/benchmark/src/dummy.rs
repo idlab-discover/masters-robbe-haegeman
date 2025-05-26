@@ -15,6 +15,7 @@ use kube::{
     api::{ObjectMeta, PostParams},
 };
 use kube_primary::PrimaryResourceExt;
+use tracing::error;
 
 use crate::crd::Database;
 
@@ -66,7 +67,7 @@ pub async fn create_dummy_resources_by_count(
         )
         .await
         {
-            eprintln!("Failed to create {:?}: {}", resource_type, e);
+            error!("Failed to create {resource_type:?}: {e}");
         }
     }
 }
