@@ -13,3 +13,4 @@ visualize/
 
 .venv
 .mypy_cache
+__pycache__
