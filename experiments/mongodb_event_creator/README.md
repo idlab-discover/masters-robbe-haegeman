@@ -1,6 +1,9 @@
 # Event creator for MongoDB
 
 Based on [mongodbSpammer](https://github.com/idlab-discover/wasm-operator/tree/main/controllers/mongodbSpammer)
+Extended to support read operations alongside writes,
+with the goal of determining if and when such database operations trigger reconciliation, as well as to investigate the
+effects of disabling periodic reconciliation on cluster validity.
 
 ## Setup
 
